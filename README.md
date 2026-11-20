@@ -25,6 +25,18 @@ py manage.py runserver
 
 Open `http://127.0.0.1:8000/`. The `DJANGO_SECRET_KEY` value is generated locally and kept in the current PowerShell session; set it again in a new session. Never commit a real secret. `DJANGO_DEBUG` defaults to on for local development. Set it to `0` and configure `DJANGO_ALLOWED_HOSTS` for a deployment; production also needs HTTPS and deployment-specific static-file settings.
 
+## Vercel deployment
+
+Configure these Vercel environment variables for Production (and Preview if used):
+
+- `DJANGO_SECRET_KEY`: a unique secret generated outside the repository.
+- `DJANGO_DEBUG`: `0`.
+- `DATABASE_URL`: a persistent PostgreSQL connection URL. The local SQLite database is ignored by Git and is not suitable for Vercel's serverless filesystem.
+- `DJANGO_ALLOWED_HOSTS`: comma-separated custom hostnames if using a custom domain; `*.vercel.app` hosts are already allowed.
+- `DJANGO_CSRF_TRUSTED_ORIGINS`: comma-separated HTTPS origins when using a custom domain.
+
+Run `python manage.py migrate` against the configured PostgreSQL database before using login or registration. Vercel builds static assets with `collectstatic` through the build script in `pyproject.toml`.
+
 ## Accounts and roles
 
 Public registration offers Learner and Educator roles and signs the new user in. Profile editing can update a user's name and email, but it does not accept role changes. Administrators can also manage roles in Django admin at `/admin/`. To access the admin, create a superuser with the command above.
