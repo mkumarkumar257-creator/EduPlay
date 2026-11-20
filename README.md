@@ -35,7 +35,7 @@ Configure these Vercel environment variables for Production (and Preview if used
 - `DJANGO_ALLOWED_HOSTS`: comma-separated custom hostnames if using a custom domain; `*.vercel.app` hosts are already allowed.
 - `DJANGO_CSRF_TRUSTED_ORIGINS`: comma-separated HTTPS origins when using a custom domain.
 
-Run `python manage.py migrate` against the configured PostgreSQL database before using login or registration. Vercel builds static assets with `collectstatic` through the build script in `pyproject.toml`.
+Run `python manage.py migrate` against the configured PostgreSQL database before using login or registration. Vercel automatically runs `collectstatic` during the Django build because `STATIC_ROOT` is configured in Django settings.
 
 ## Accounts and roles
 
