@@ -1,0 +1,32 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}{% if is_create %}New{% else %}Edit{% endif %} {{ content_type_label }} — Content Studio{% endblock %}
+{% block app_page_title %}Content Studio{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/content_studio.css' %}">{% endblock %}
+{% block content %}
+<section class="studio-page">
+  <div class="studio-heading"><div><p class="eyebrow"><span class="eyebrow-dot"></span> CONTENT STUDIO · {{ content_type_label|upper }}</p><h1>{% if is_create %}Create a <span class="text-accent">draft.</span>{% else %}Edit <span class="text-accent">content.</span>{% endif %}</h1><p class="page-lede">Save privately while you work. Publish only when the content is ready for learners.</p></div><a class="studio-back-link" href="{% url 'educator_content_library' %}">← Content library</a></div>
+  {% if not is_create %}<div class="studio-status-banner status-{{ content.status }}"><span>Status</span><strong>{{ content.get_status_display }}</strong><span>Visibility: {{ content.get_visibility_display }}</span>{% if content.updated_at %}<span>Updated {{ content.updated_at|date:"M j, Y · g:i A" }}</span>{% endif %}</div>{% endif %}
+  <form method="post" class="studio-form"{% if content_type == 'quiz' %} id="quiz-editor-form"{% endif %}>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="studio-form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <section class="studio-panel"><div class="studio-panel-heading"><div><span class="studio-kicker">CONTENT DETAILS</span><h2>About this {{ content_type_label|lower }}</h2></div><span class="studio-panel-icon" aria-hidden="true">✦</span></div>
+      <div class="studio-field-grid">
+      {% for field in form %}<div class="studio-field{% if field.name == 'description' or field.name == 'body' or field.name == 'instructions' or field.name == 'learning_objectives' or field.name == 'completion_criteria' %} studio-field-wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span aria-hidden="true">*</span>{% endif %}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{{ field.errors }}</div>{% endfor %}
+      </div>
+    </section>
+    {% if content_type == 'quiz' %}
+      <section class="studio-panel question-builder-panel"><div class="studio-panel-heading"><div><span class="studio-kicker">QUESTION BANK</span><h2>Build your quiz</h2><p>Each active question needs four distinct options and one correct answer. Correct answers are hidden from learners until they respond.</p></div><span class="studio-panel-icon studio-rose-icon" aria-hidden="true">?</span></div>
+        {{ question_formset.management_form }}
+        {% if question_formset.non_form_errors %}<div class="studio-form-errors">{{ question_formset.non_form_errors }}</div>{% endif %}
+        <div id="question-editor-list" class="question-editor-list">{% for question_form in question_formset %}{% include "core/question_editor_row.html" with form=question_form row_number=forloop.counter %}{% endfor %}</div>
+        <template id="question-row-template">{% include "core/question_editor_row.html" with form=question_formset.empty_form row_number="new" %}</template>
+        <button class="btn btn-quiet studio-add-question" type="button" id="add-question-row">＋ Add question</button>
+        <p class="studio-helper-text">Order numbers determine play order. At least one active, complete question is required before publishing.</p>
+      </section>
+    {% endif %}
+    <div class="studio-form-actions"><button class="btn btn-primary-ep" type="submit">Save draft <span aria-hidden="true">✓</span></button><a class="btn btn-quiet" href="{% url 'educator_content_library' %}">Cancel</a>{% if not is_create %}<a class="btn btn-quiet" href="{% url 'educator_content_preview' content_type=content_type pk=content.pk %}">Preview</a>{% endif %}</div>
+  </form>
+</section>
+{% endblock %}
+{% block extra_scripts %}{{ block.super }}{% if content_type == 'quiz' %}<script src="{% static 'js/quiz_builder.js' %}" defer></script>{% endif %}{% endblock %}

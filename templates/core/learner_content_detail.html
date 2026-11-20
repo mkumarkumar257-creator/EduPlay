@@ -1,0 +1,20 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}{{ content.title }} — EduPlay{% endblock %}
+{% block app_page_title %}{% if content_type == 'lesson' %}Learning Lesson{% else %}Practice Activity{% endif %}{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/content_studio.css' %}">{% endblock %}
+{% block content %}
+<section class="studio-page learner-detail-page">
+  <a class="studio-back-link" href="{% url 'learner_content_library' %}">← Learning modules</a>
+  <article class="learner-detail-card">
+    <div class="learner-card-top"><span class="content-type-pill type-{{ content_type }}">{% if content_type == 'lesson' %}Learning lesson{% else %}Practice activity{% endif %}</span><span class="difficulty-pill">{{ content.get_difficulty_display }}</span><span class="difficulty-pill">{{ content.estimated_duration_minutes }} min</span></div>
+    {% if content.topic %}<p class="studio-kicker">{{ content.topic.name }}{% if content.subject %} · {{ content.subject }}{% endif %}</p>{% elif content.subject %}<p class="studio-kicker">{{ content.subject }}</p>{% endif %}
+    <h1>{{ content.title }}</h1><p class="learner-content-description">{{ content.description }}</p>
+    {% if content.learning_objectives %}<section class="learner-objectives"><h2>Learning objectives</h2><ul>{% for objective in content.objectives_list %}<li>{{ objective }}</li>{% endfor %}</ul></section>{% endif %}
+    {% if content_type == 'lesson' %}<div class="lesson-body">{{ content.body|linebreaks }}</div>{% else %}<section class="practice-instructions"><h2>Instructions</h2><div class="lesson-body">{{ content.instructions|linebreaks }}</div>{% if content.completion_criteria %}<h3>Completion criteria</h3><div class="lesson-body">{{ content.completion_criteria|linebreaks }}</div>{% endif %}</section>{% endif %}
+    <div class="learner-progress-callout"><div><span class="studio-kicker">YOUR PROGRESS</span><strong class="studio-status-pill status-{{ progress.status }}">{{ progress.get_status_display }}</strong></div>
+      {% if progress.status == 'completed' %}<p>Completed {{ progress.completed_at|date:"M j, Y · g:i A" }}</p>{% else %}<form method="post" action="{% url 'learner_content_complete' content_type=content_type pk=content.pk %}">{% csrf_token %}<button class="btn btn-primary-ep" type="submit">Mark complete <span aria-hidden="true">✓</span></button></form>{% endif %}
+    </div>
+  </article>
+</section>
+{% endblock %}

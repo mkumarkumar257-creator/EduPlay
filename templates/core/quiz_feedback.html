@@ -1,0 +1,16 @@
+{% extends "app_base.html" %}
+{% block title %}Answer feedback — {{ attempt.game.title }}{% endblock %}
+{% block app_page_title %}{{ attempt.game.title }}{% endblock %}
+{% block content %}
+<section class="quiz-page quiz-feedback-page">
+  <div class="quiz-run-topline"><span class="quiz-back-link"><span aria-hidden="true">✦</span> {{ feedback.correct_so_far }} correct · Question {{ feedback.question_number }} of {{ attempt.total_questions }}</span><div class="quiz-timer"><span class="timer-icon" aria-hidden="true">◷</span>{% if attempt.status == "in_progress" %}<span>TIME LEFT</span><strong data-quiz-timer data-seconds="{{ time_remaining }}" aria-live="off">--:--</strong>{% else %}<span>FINAL ANSWER SAVED</span>{% endif %}</div></div>
+  <div class="quiz-progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress_percent }}"><span style="width: {{ progress_percent }}%"></span></div>
+  <article class="quiz-feedback-card{% if feedback.answer.is_correct %} feedback-correct{% else %} feedback-incorrect{% endif %}">
+    <span class="feedback-symbol" aria-hidden="true">{% if feedback.answer.is_correct %}✓{% else %}↻{% endif %}</span>
+    {% if feedback.answer.is_correct %}<p class="eyebrow">NICE WORK</p><h1>That’s correct.</h1><p class="feedback-subtitle">You selected <strong>{{ feedback.selected_text }}</strong>.</p>{% else %}<p class="eyebrow">KEEP GOING</p><h1>Not quite this time.</h1><p class="feedback-subtitle">You selected <strong>{{ feedback.selected_text }}</strong>. The correct answer is <strong>{{ feedback.correct_text }}</strong>.</p>{% endif %}
+    {% if feedback.answer.question.explanation %}<div class="feedback-explanation"><span>WHY</span><p>{{ feedback.answer.question.explanation }}</p></div>{% endif %}
+    {% if is_last_question %}<a class="btn btn-primary-ep feedback-continue" href="{% url 'quiz_attempt' attempt_id=attempt.pk %}">View final score <span aria-hidden="true">→</span></a>{% else %}<a class="btn btn-primary-ep feedback-continue" href="{% url 'quiz_attempt' attempt_id=attempt.pk %}">Next question <span aria-hidden="true">→</span></a>{% endif %}
+  </article>
+  {% if attempt.status == "in_progress" %}<form id="quiz-timeout-form" class="visually-hidden" method="post" action="{% url 'submit_quiz_answer' attempt_id=attempt.pk %}">{% csrf_token %}</form>{% endif %}
+</section>
+{% endblock %}

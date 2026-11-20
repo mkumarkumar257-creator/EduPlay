@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}EduPlay — Learning that moves with you{% endblock %}
+{% block content %}
+<section class="hero-section">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="eyebrow-dot"></span> A NEW WAY TO LEARN</p>
+      <h1>Make every<br>lesson a <span class="text-accent">level up.</span></h1>
+      <p class="hero-lede">EduPlay brings the energy of play to learning—helping students build momentum, see their progress, and stay curious along the way.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary-ep btn-lg" href="{% url 'register' %}">Start learning <span aria-hidden="true">↗</span></a>
+        <a class="btn btn-quiet btn-lg" href="{% url 'about' %}">Explore EduPlay <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="hero-footnote"><span class="tiny-check" aria-hidden="true">✓</span> Free to create an account <span class="footnote-divider">·</span> Built for learners and educators</div>
+    </div>
+
+    <div class="hero-art" aria-label="EduPlay learning workspace preview">
+      <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+      <div class="workspace-preview">
+        <div class="preview-topline"><span class="preview-label"><i></i> YOUR LEARNING SPACE</span><span class="preview-menu" aria-hidden="true">•••</span></div>
+        <div class="preview-welcome"><div><span class="preview-kicker">WELCOME TO EDUPLAY</span><h2>Your next chapter<br>starts here.</h2></div><div class="preview-avatar" aria-hidden="true">E</div></div>
+        <div class="preview-divider"></div>
+        <div class="preview-next"><div class="preview-icon" aria-hidden="true">↗</div><div><span class="preview-kicker">A SPACE TO GROW</span><strong>Find your learning rhythm</strong><small>Your courses and progress will live here.</small></div></div>
+        <div class="preview-progress"><span>YOUR JOURNEY</span><div class="progress-track"><i></i></div><small>Create an account to begin</small></div>
+      </div>
+      <div class="floating-tag tag-top"><span class="tag-spark" aria-hidden="true">✦</span> Learn at your pace</div>
+      <div class="floating-tag tag-bottom"><span class="tag-circle" aria-hidden="true">↗</span> Progress, made visible</div>
+    </div>
+  </div>
+  <div class="hero-grid-glow" aria-hidden="true"></div>
+</section>
+
+<section class="promise-section">
+  <div class="container">
+    <div class="section-heading-row"><div><p class="eyebrow">THE EDUPLAY APPROACH</p><h2>Learning should feel like <span class="text-accent">progress.</span></h2></div><p class="section-description">A thoughtful foundation for a more engaging learning experience, designed to grow with every learner.</p></div>
+    <div class="promise-grid">
+      <article class="promise-card"><div class="promise-number">01</div><div class="promise-icon icon-blue" aria-hidden="true">◎</div><h3>Find your momentum</h3><p>Small steps and clear milestones make it easier to keep moving forward.</p><span class="card-rule"></span></article>
+      <article class="promise-card"><div class="promise-number">02</div><div class="promise-icon icon-rose" aria-hidden="true">✳</div><h3>Make progress visible</h3><p>Give learners a clearer view of where they are and what comes next.</p><span class="card-rule"></span></article>
+      <article class="promise-card"><div class="promise-number">03</div><div class="promise-icon icon-blue" aria-hidden="true">⌁</div><h3>Build it together</h3><p>A shared space for learners and educators to shape better learning habits.</p><span class="card-rule"></span></article>
+    </div>
+    <div class="roadmap-note"><span class="roadmap-indicator" aria-hidden="true"></span><p><strong>EduPlay is growing in phases.</strong> Account access and the learning workspace are ready first; interactive learning tools will follow.</p><a href="{% url 'about' %}">See the project direction <span aria-hidden="true">→</span></a></div>
+  </div>
+</section>
+
+<section class="closing-cta"><div class="container closing-inner"><div><p class="eyebrow">YOUR JOURNEY STARTS HERE</p><h2>Ready to level up?</h2></div><a class="btn btn-primary-ep btn-lg" href="{% url 'register' %}">Create your account <span aria-hidden="true">↗</span></a></div></section>
+{% endblock %}
+

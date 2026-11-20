@@ -1,0 +1,18 @@
+<fieldset class="question-editor-row" data-question-row>
+  <div class="question-editor-row-heading"><strong>Question <span data-question-number>{{ row_number }}</span></strong><button class="studio-inline-button" type="button" data-remove-question>Remove</button></div>
+  {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+  {{ form.DELETE.as_hidden }}
+  {% if form.non_field_errors %}<div class="studio-form-errors">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="studio-field-grid">
+    <div class="studio-field question-order-field"><label for="{{ form.order.id_for_label }}">Order</label>{{ form.order }}{{ form.order.errors }}</div>
+    <div class="studio-field question-prompt-field"><label for="{{ form.prompt.id_for_label }}">Question</label>{{ form.prompt }}{{ form.prompt.errors }}</div>
+    <div class="studio-field"><label for="{{ form.option_a.id_for_label }}">Option A</label>{{ form.option_a }}{{ form.option_a.errors }}</div>
+    <div class="studio-field"><label for="{{ form.option_b.id_for_label }}">Option B</label>{{ form.option_b }}{{ form.option_b.errors }}</div>
+    <div class="studio-field"><label for="{{ form.option_c.id_for_label }}">Option C</label>{{ form.option_c }}{{ form.option_c.errors }}</div>
+    <div class="studio-field"><label for="{{ form.option_d.id_for_label }}">Option D</label>{{ form.option_d }}{{ form.option_d.errors }}</div>
+    <div class="studio-field"><label for="{{ form.correct_option.id_for_label }}">Correct answer</label>{{ form.correct_option }}{{ form.correct_option.errors }}</div>
+    <div class="studio-field"><label for="{{ form.difficulty.id_for_label }}">Difficulty</label>{{ form.difficulty }}{{ form.difficulty.errors }}</div>
+    <div class="studio-field question-topics-field"><label for="{{ form.topics.id_for_label }}">Topics</label>{{ form.topics }}{{ form.topics.errors }}<small>Hold Ctrl or Command to select more than one topic.</small></div>
+    <div class="studio-field question-explanation-field"><label for="{{ form.explanation.id_for_label }}">Explanation after answer</label>{{ form.explanation }}{{ form.explanation.errors }}</div>
+  </div>
+</fieldset>

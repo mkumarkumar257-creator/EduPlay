@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Log in — EduPlay{% endblock %}
+{% block content %}
+<section class="auth-section"><div class="container auth-container"><div class="auth-aside"><p class="eyebrow"><span class="eyebrow-dot"></span> WELCOME BACK</p><h1>Your next level<br>is <span class="text-accent">waiting.</span></h1><p>Pick up where your curiosity left off. Your EduPlay workspace is just a sign-in away.</p><div class="auth-aside-rule"></div><div class="auth-aside-note"><span aria-hidden="true">✦</span> Learn. Play. Level Up.</div></div>
+  <div class="auth-card"><div class="auth-card-heading"><span class="auth-icon" aria-hidden="true">↗</span><p class="eyebrow">YOUR ACCOUNT</p><h2>Welcome back</h2><p>Enter your username or email and password.</p></div>
+    {% if form.non_field_errors %}<div class="form-error-banner" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    <form method="post" class="ep-form" novalidate>{% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+      <div class="field-group"><label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>{{ form.username }}{% for error in form.username.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>
+      <div class="field-group"><label for="{{ form.password.id_for_label }}">Password</label><div class="password-input-wrap">{{ form.password }}<button class="password-toggle" type="button" data-password-toggle="{{ form.password.id_for_label }}" aria-label="Show password" aria-pressed="false">Show</button></div>{% for error in form.password.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>
+      <label class="remember-row">{{ form.remember_me }}<span>Remember me</span></label>
+      <button class="btn btn-primary-ep auth-submit" type="submit">Log in <span aria-hidden="true">↗</span></button>
+    </form>
+    <p class="auth-switch">New to EduPlay? <a href="{% url 'register' %}">Create an account</a></p>
+  </div>
+</div></section>
+{% endblock %}

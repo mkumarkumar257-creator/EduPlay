@@ -1,0 +1,59 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}Collaboration Hub — EduPlay{% endblock %}
+{% block app_page_title %}Collaboration Hub{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/collaboration.css' %}">{% endblock %}
+{% block content %}
+<section class="collab-page">
+  <div class="collab-heading"><div><p class="eyebrow"><span class="eyebrow-dot"></span> LEARN BETTER TOGETHER</p><h1>Collaboration <span class="text-accent">Hub.</span></h1><p class="page-lede">Build a team, take on shared challenges, and celebrate progress earned together.</p></div><div class="collab-heading-mark" aria-hidden="true">◎</div></div>
+
+  {% if team %}
+    <section class="collab-team-hero">
+      <div class="collab-team-emblem" aria-hidden="true">{{ team.avatar|default:"◎" }}</div>
+      <div class="collab-team-copy"><p class="collab-kicker">YOUR ACTIVE TEAM</p><h2>{{ team.name }}</h2><p>{{ team.description|default:"Your team is ready to take on a shared challenge." }}</p><a class="collab-inline-link" href="{% url 'collaboration_team' team_id=team.pk %}">Open team details <span aria-hidden="true">→</span></a></div>
+      <div class="collab-team-quick-stats"><div><strong>{{ active_member_count }}<small>/{{ max_team_size }}</small></strong><span>MEMBERS</span></div><div><strong>{{ team.total_xp }}</strong><span>TEAM XP</span></div><div class="collab-code"><span>JOIN CODE</span><strong>{{ team.join_code }}</strong></div></div>
+    </section>
+  {% else %}
+    <section class="collab-onboarding-grid">
+      <article class="collab-panel collab-onboarding-intro"><p class="collab-kicker">YOUR NEXT MOVE</p><h2>Find your people.</h2><p>Each learner can belong to one active team. Teams can have up to {{ max_team_size }} members, and a joining code keeps your group private.</p><div class="collab-rule-note"><span aria-hidden="true">i</span><span>You will become the leader when you create a team. Leadership can be transferred later.</span></div></article>
+      <article class="collab-panel" id="create-team"><div class="collab-panel-heading"><div><p class="collab-kicker">START A GROUP</p><h2>Create a team</h2></div><span class="collab-panel-icon">＋</span></div>
+        <form method="post" action="{% url 'collaboration_create_team' %}" class="collab-form">{% csrf_token %}
+          {% for field in create_form %}<div class="collab-field{% if field.name == 'avatar' %} collab-avatar-field{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<span class="collab-error">{{ error }}</span>{% endfor %}</div>{% endfor %}
+          {% for error in create_form.non_field_errors %}<span class="collab-error">{{ error }}</span>{% endfor %}
+          <button class="btn btn-primary-ep" type="submit">Create team <span aria-hidden="true">→</span></button>
+        </form>
+      </article>
+      <article class="collab-panel collab-join-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">HAVE A CODE?</p><h2>Join a team</h2></div><span class="collab-panel-icon rose-icon">⌁</span></div>
+        <form method="post" action="{% url 'collaboration_join_team' %}" class="collab-form">{% csrf_token %}{% for field in join_form %}<div class="collab-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<span class="collab-error">{{ error }}</span>{% endfor %}</div>{% endfor %}{% for error in join_form.non_field_errors %}<span class="collab-error">{{ error }}</span>{% endfor %}<button class="btn collab-secondary-button" type="submit">Join with code <span aria-hidden="true">→</span></button></form>
+      </article>
+    </section>
+  {% endif %}
+
+  <div class="collab-section-heading" id="challenges"><div><p class="collab-kicker">TEAM ACTIVITIES</p><h2>Challenges to take on</h2></div><span class="collab-count-label">{{ available_challenges|length }} OPEN</span></div>
+  {% if available_challenges %}<div class="collab-challenge-grid">
+    {% for challenge in available_challenges %}<article class="collab-challenge-card"><div class="collab-card-top"><span class="challenge-category-tag">{{ challenge.get_category_display }}</span><span class="challenge-difficulty difficulty-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span></div><h3><a href="{% url 'collaboration_challenge' slug=challenge.slug %}">{{ challenge.title }}</a></h3><p>{{ challenge.description }}</p><div class="challenge-meta"><span><strong>+{{ challenge.xp_reward }}</strong> team XP</span><span>Due {{ challenge.deadline|date:"M j, Y" }}</span></div>{% if challenge.is_seeded_sample %}<span class="sample-content-label">SEEDED SAMPLE</span>{% endif %}<a class="challenge-open-link" href="{% url 'collaboration_challenge' slug=challenge.slug %}">View challenge <span aria-hidden="true">→</span></a></article>{% endfor %}
+  </div>{% else %}<div class="collab-empty-inline"><span class="collab-empty-mark">✦</span><div><strong>No challenges are open right now</strong><p>New team challenges will appear here when published.</p></div></div>{% endif %}
+
+  {% if upcoming_challenges %}<section class="collab-panel collab-upcoming-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">COMING UP</p><h2>Scheduled challenges</h2></div><span class="collab-panel-icon">◷</span></div><div class="collab-upcoming-list">{% for challenge in upcoming_challenges %}<a href="{% url 'collaboration_challenge' slug=challenge.slug %}"><span class="upcoming-date">{{ challenge.starts_at|date:"M j" }}</span><span><strong>{{ challenge.title }}</strong><small>{{ challenge.get_category_display }} · {{ challenge.get_difficulty_display }}</small></span><span class="upcoming-arrow" aria-hidden="true">→</span></a>{% endfor %}</div></section>{% endif %}
+
+  {% if team %}<div class="collab-two-column">
+    <section class="collab-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">IN MOTION</p><h2>Active challenges</h2></div><a class="collab-small-link" href="{% url 'collaboration_team' team_id=team.pk %}">Team details →</a></div>
+      {% if active_team_challenges %}<ul class="collab-list">{% for participation in active_team_challenges %}<li><span class="collab-list-icon">⌁</span><div><strong><a href="{% url 'collaboration_challenge' slug=participation.challenge.slug %}">{{ participation.challenge.title }}</a></strong><small>Started {{ participation.joined_at|date:"M j, Y" }} · Submission required</small><div class="collab-progress-track"><i style="width: {{ participation.progress_percent }}%"></i></div></div><span class="progress-value">{{ participation.progress_percent }}%</span></li>{% endfor %}</ul>{% else %}<div class="collab-empty-small"><strong>No active challenges yet</strong><p>Pick an open challenge above to get started as a team.</p></div>{% endif %}
+    </section>
+    <section class="collab-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">TEAM HISTORY</p><h2>Recently completed</h2></div><span class="collab-panel-icon rose-icon">✓</span></div>
+      {% if completed_team_challenges %}<ul class="collab-list">{% for participation in completed_team_challenges %}<li><span class="collab-list-icon completed-icon">✓</span><div><strong><a href="{% url 'collaboration_challenge' slug=participation.challenge.slug %}">{{ participation.challenge.title }}</a></strong><small>{{ participation.completed_at|date:"M j, Y" }} · Completed by {{ participation.submitted_by.username|default:"a team member" }}</small></div><span class="earned-xp">+{{ participation.xp_awarded }} XP</span></li>{% endfor %}</ul>{% else %}<div class="collab-empty-small"><strong>Your completions will appear here</strong><p>Completed challenges and earned team XP are recorded automatically.</p></div>{% endif %}
+    </section>
+  </div>{% endif %}
+
+  <div class="collab-two-column collab-lower-grid">
+    <section class="collab-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">ALL ACTIVE TEAMS</p><h2>Team leaderboard</h2></div><span class="collab-panel-icon">↗</span></div>
+      {% if leaderboard %}<ol class="collab-leaderboard">{% for ranked_team in leaderboard %}<li class="{% if team and ranked_team.pk == team.pk %}is-own-team{% endif %}"><span class="leaderboard-rank">{% if forloop.counter < 4 %}0{{ forloop.counter }}{% else %}{{ forloop.counter }}{% endif %}</span><span class="leaderboard-avatar">{{ ranked_team.avatar|default:"◎" }}</span><div class="leaderboard-team"><strong>{{ ranked_team.name }}</strong><small>{{ ranked_team.leaderboard_member_count }} members · {{ ranked_team.challenges_completed }} challenges complete</small></div><span class="leaderboard-xp">{{ ranked_team.total_xp }}<small> XP</small></span></li>{% endfor %}</ol>{% else %}<div class="collab-empty-small"><strong>Team rankings are getting started</strong><p>Rankings appear once at least two active teams have joined EduPlay. Scores come from completed team challenges.</p></div>{% endif %}
+    </section>
+    <section class="collab-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">RECENT EVENTS</p><h2>Team activity</h2></div><span class="collab-panel-icon rose-icon">◷</span></div>
+      {% if team %}{% if team_activity %}<ul class="collab-activity-list">{% for event in team_activity %}<li><span class="activity-pulse"></span><div><strong>{{ event.message }}</strong><small>{{ event.created_at|date:"M j, Y · g:i A" }}</small></div>{% if event.xp_awarded %}<span class="earned-xp">+{{ event.xp_awarded }}</span>{% endif %}</li>{% endfor %}</ul>{% else %}<div class="collab-empty-small"><strong>No team activity yet</strong><p>Team events will be collected here.</p></div>{% endif %}{% else %}<div class="collab-empty-small"><strong>Join a team to see its activity</strong><p>Team creation, member changes, and challenge milestones are recorded here.</p></div>{% endif %}
+    </section>
+  </div>
+
+  {% if team %}<div class="collab-quick-actions"><span class="collab-kicker">QUICK ACTIONS</span><a href="{% url 'collaboration_team' team_id=team.pk %}">Manage your team <span aria-hidden="true">→</span></a><a href="#challenges">Browse challenges <span aria-hidden="true">→</span></a></div>{% else %}<div class="collab-quick-actions"><span class="collab-kicker">QUICK ACTIONS</span><a href="#create-team">Create a team <span aria-hidden="true">→</span></a><a href="#challenges">Browse challenges <span aria-hidden="true">→</span></a></div>{% endif %}
+</section>
+{% endblock %}

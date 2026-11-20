@@ -1,0 +1,53 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}Educator Analytics — EduPlay{% endblock %}
+{% block app_page_title %}Educator Analytics{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/analytics.css' %}">{% endblock %}
+{% block content %}
+<section class="analytics-page educator-analytics-page">
+  <div class="analytics-heading"><div><p class="eyebrow"><span class="eyebrow-dot"></span> EDUCATOR REPORTING</p><h1>Learner <span class="text-accent">Analytics.</span></h1><p class="page-lede">Platform-wide activity from saved learner records. There are no educator-course assignments in the current data model.</p></div><a class="analytics-back-link" href="{% url 'educator_dashboard' %}">← Educator dashboard</a></div>
+  <div class="analytics-scope-banner"><span aria-hidden="true">i</span><p><strong>Reporting scope:</strong> all learner accounts on this EduPlay instance. Filters apply to activity in the selected period; XP in the learner table is the lifetime account total.</p></div>
+  <form class="analytics-filters" method="get" aria-label="Filter educator analytics">
+    <div class="analytics-filter-field"><label for="{{ filters.period.id_for_label }}">Date range</label>{{ filters.period }}</div>
+    <div class="analytics-filter-field"><label for="{{ filters.activity_type.id_for_label }}">Activity type</label>{{ filters.activity_type }}</div>
+    <div class="analytics-filter-field"><label for="{{ filters.topic.id_for_label }}">Topic</label>{{ filters.topic }}</div>
+    <div class="analytics-filter-field course-filter-field"><label for="educator-course-filter">Course</label><select id="educator-course-filter" class="form-select" disabled aria-describedby="educator-course-note"><option>Course tracking unavailable</option></select></div>
+    <button type="submit" class="btn btn-primary-ep">Apply filters <span aria-hidden="true">→</span></button>
+    <p id="educator-course-note" class="analytics-filter-note">Course and enrollment records are not implemented, so this filter is disabled.</p>
+    {% if topic_filter_note %}<p class="analytics-filter-note topic-filter-note">Topic filters apply to tagged quizzes, simulations, lessons, and practice. Team challenge activity is not topic-filtered.</p>{% endif %}
+  </form>
+
+  <div class="analytics-kpi-grid educator-kpi-grid">
+    <article class="analytics-kpi-card"><span>TOTAL LEARNERS</span><strong>{{ total_learners }}</strong><p>Registered learner accounts</p><i class="kpi-accent"></i></article>
+    <article class="analytics-kpi-card"><span>ACTIVE LEARNERS</span><strong>{{ active_learners }}</strong><p>{{ active_definition }}</p><i class="kpi-accent rose-accent"></i></article>
+    <article class="analytics-kpi-card"><span>LEARNER ACTIVITIES</span><strong>{{ total_activities }}</strong><p>Quizzes, simulations, content progress, and team actions in this range</p><i class="kpi-accent"></i></article>
+    <article class="analytics-kpi-card"><span>AVERAGE QUIZ PERFORMANCE</span>{% if average_performance != None %}<strong>{{ average_performance }}<small>%</small></strong><p>{{ quiz_answer_count }} recorded quiz answers</p>{% else %}<strong class="kpi-na">—</strong><p>Insufficient quiz data in this filter range</p>{% endif %}<i class="kpi-accent rose-accent"></i></article>
+    <article class="analytics-kpi-card"><span>CATALOG COMPLETION RATE</span>{% if completion_rate != None %}<strong>{{ completion_rate }}<small>%</small></strong><p>{{ catalog_size }} implemented activities in this filter scope</p>{% else %}<strong class="kpi-na">—</strong><p>No matching activities are available</p>{% endif %}<i class="kpi-accent"></i></article>
+    <article class="analytics-kpi-card"><span>LEARNER PARTICIPATION</span>{% if participation_rate != None %}<strong>{{ participation_rate }}<small>%</small></strong><p>{{ active_learners }} of {{ total_learners }} learners active</p>{% else %}<strong class="kpi-na">—</strong><p>No learner accounts to compare</p>{% endif %}<i class="kpi-accent rose-accent"></i></article>
+  </div>
+
+  <div class="analytics-section-heading"><div><p class="analytics-kicker">ACTIVITY TRENDS</p><h2>Participation in this period</h2></div><span class="analytics-badge">{{ scope.period|upper }} VIEW</span></div>
+  <div class="analytics-chart-grid educator-charts-grid">
+    <article class="analytics-card analytics-chart-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">LEARNER PARTICIPATION</span><h3>Activity by day or week</h3><p>Game and simulation completions, content progress, and team activity.</p></div><span class="chart-icon blue-chart-icon">◷</span></div>{% if has_activity_chart_data %}<div class="analytics-canvas-wrap"><canvas id="activity-chart" role="img" aria-label="Learner activity counts over time"></canvas></div>{% else %}<div class="analytics-chart-empty"><strong>No learner activity in this range</strong><p>Try a longer period or wait for learners to record activity.</p></div>{% endif %}</article>
+    <article class="analytics-card analytics-chart-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">PARTICIPATION MIX</span><h3>Activity distribution</h3><p>Counts of saved events by activity type.</p></div><span class="chart-icon rose-chart-icon">◉</span></div>{% if has_distribution_data %}<div class="analytics-canvas-wrap distribution-canvas-wrap"><canvas id="distribution-chart" role="img" aria-label="Educator activity distribution across types"></canvas></div>{% else %}<div class="analytics-chart-empty"><strong>No activity distribution yet</strong><p>Distribution appears after learners record activity.</p></div>{% endif %}</article>
+  </div>
+  {{ activity_chart|json_script:"analytics-activity-data" }}
+  {{ activity_distribution|json_script:"analytics-distribution-data" }}
+
+  <section class="analytics-card educator-insights-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">TRANSPARENT RULES</span><h2>Educator insights</h2><p>Performance labels require at least {{ min_answers }} quiz answers. Learners below that threshold are not classified.</p></div><span class="chart-icon rose-chart-icon">✧</span></div>
+    <div class="educator-insight-grid">
+      <div class="educator-insight-block"><h3><span class="insight-label-dot fact-dot"></span>High performance</h3>{% if high_performers %}<ul>{% for row in high_performers|slice:":5" %}<li><strong>{{ row.learner.get_full_name|default:row.learner.username }}</strong><span>{{ row.quiz_accuracy }}% accuracy · {{ row.quiz_answer_count }} answers</span></li>{% endfor %}</ul>{% else %}<p>No learner meets the minimum evidence and 80% accuracy rule in this filter range.</p>{% endif %}</div>
+      <div class="educator-insight-block support-insight-block"><h3><span class="insight-label-dot recommendation-dot"></span>Additional support may help</h3>{% if support_learners %}<ul>{% for row in support_learners|slice:":5" %}<li><strong>{{ row.learner.get_full_name|default:row.learner.username }}</strong><span>{{ row.quiz_accuracy }}% accuracy · {{ row.quiz_answer_count }} answers</span></li>{% endfor %}</ul>{% else %}<p>No learner meets the minimum evidence and below-50% accuracy rule in this filter range.</p>{% endif %}</div>
+      <div class="educator-insight-block topic-insight-block"><h3><span class="insight-label-dot recommendation-dot"></span>Topics with lower observed accuracy</h3>{% if low_performing_topics %}<ul>{% for row in low_performing_topics %}<li><strong>{{ row.question__topics__name }}</strong><span>{{ row.accuracy }}% · {{ row.answer_count }} answers across {{ row.question_count }} questions</span></li>{% endfor %}</ul>{% else %}<p>No topic meets the evidence threshold with accuracy below 60%.</p>{% endif %}</div>
+      <div class="educator-insight-block"><h3><span class="insight-label-dot fact-dot"></span>Participation note</h3><p>{{ inactive_learners }} learner account(s) had no qualifying activity in the selected period. This is an activity observation, not a performance judgment.</p></div>
+    </div>
+  </section>
+
+  <section class="analytics-card learner-table-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">LEARNER PERFORMANCE</span><h2>Learner participation</h2><p>XP is lifetime account XP; activity, accuracy, completion, and last activity use the selected filters.</p></div><span class="analytics-badge">{{ total_learners }} LEARNERS</span></div>
+    {% if page_obj.object_list %}<div class="analytics-table-wrap"><table class="analytics-learner-table"><thead><tr><th scope="col">Learner</th><th scope="col">XP</th><th scope="col">Activities</th><th scope="col">Quiz accuracy</th><th scope="col">Progress</th><th scope="col">Last activity</th></tr></thead><tbody>{% for row in page_obj.object_list %}<tr><td><strong>{{ row.learner.get_full_name|default:row.learner.username }}</strong><small>@{{ row.learner.username }}</small></td><td><strong>{{ row.xp }}</strong><small>XP lifetime</small></td><td>{{ row.activities_count }}</td><td>{% if row.quiz_accuracy != None %}{{ row.quiz_accuracy }}%<small>{{ row.quiz_answer_count }} answers</small>{% else %}<span class="analytics-muted-cell">Insufficient data</span>{% endif %}</td><td>{% if row.learning_progress != None %}<div class="table-progress"><i style="width: {{ row.learning_progress }}%"></i></div><small>{{ row.learning_progress }}% · {{ row.completed_count }}/{{ row.catalog_size }}</small>{% else %}<span class="analytics-muted-cell">Not available</span>{% endif %}</td><td>{% if row.last_activity %}{{ row.last_activity|date:"M j, Y · g:i A" }}{% else %}<span class="analytics-muted-cell">No activity</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+      {% if page_obj.paginator.num_pages > 1 %}<nav class="analytics-pagination" aria-label="Learner table pages">{% if page_obj.has_previous %}<a href="?{{ query_without_page }}&page={{ page_obj.previous_page_number }}">← Previous</a>{% endif %}<span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?{{ query_without_page }}&page={{ page_obj.next_page_number }}">Next →</a>{% endif %}</nav>{% endif %}
+    {% else %}<div class="analytics-chart-empty"><strong>No learner accounts yet</strong><p>Registered learners will appear here once accounts exist.</p></div>{% endif %}
+  </section>
+</section>
+{% endblock %}
+{% block extra_scripts %}{{ block.super }}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" defer></script><script src="{% static 'js/analytics.js' %}" defer></script>{% endblock %}

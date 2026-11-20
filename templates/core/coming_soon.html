@@ -1,0 +1,16 @@
+{% extends "app_base.html" %}
+{% block title %}{{ feature_title }} — EduPlay{% endblock %}
+{% block app_page_title %}{{ feature_title }}{% endblock %}
+{% block content %}
+<section class="placeholder-page">
+  <div class="placeholder-card">
+    <span class="placeholder-mark" aria-hidden="true">✦</span>
+    <span class="coming-soon-pill">COMING SOON</span>
+    <p class="eyebrow">EDUPLAY ROADMAP</p>
+    <h1>{{ feature_title }}</h1>
+    <p class="placeholder-description">{{ feature_description }}</p>
+    <p class="placeholder-note">This section is planned, but it does not have working features or learner data yet.</p>
+    {% if user.role == "learner" %}<a class="btn btn-primary-ep" href="{% url 'learner_dashboard' %}">Back to dashboard <span aria-hidden="true">→</span></a>{% else %}<a class="btn btn-primary-ep" href="{% url 'educator_dashboard' %}">Back to dashboard <span aria-hidden="true">→</span></a>{% endif %}
+  </div>
+</section>
+{% endblock %}

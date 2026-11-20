@@ -1,0 +1,15 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}Create learning content — EduPlay{% endblock %}
+{% block app_page_title %}Content Studio{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/content_studio.css' %}">{% endblock %}
+{% block content %}
+<section class="studio-page">
+  <div class="studio-heading"><div><p class="eyebrow"><span class="eyebrow-dot"></span> EDUCATOR WORKSPACE</p><h1>Create <span class="text-accent">content.</span></h1><p class="page-lede">Choose a format to begin a new draft in your Content Studio.</p></div><a class="studio-back-link" href="{% url 'educator_content_library' %}">← Content library</a></div>
+  <div class="studio-type-grid">
+    {% for value,label,description,icon in content_type_cards %}
+      <a class="studio-type-card" href="{% url 'educator_content_new' content_type=value %}"><span class="studio-type-icon" aria-hidden="true">{{ icon }}</span><span class="studio-type-label">{{ label }}</span><strong>{{ description }}</strong><span class="studio-type-action">Start a draft <b aria-hidden="true">→</b></span></a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

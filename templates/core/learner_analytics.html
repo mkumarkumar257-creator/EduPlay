@@ -1,0 +1,59 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}My Analytics — EduPlay{% endblock %}
+{% block app_page_title %}Performance Analytics{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/analytics.css' %}">{% endblock %}
+{% block content %}
+<section class="analytics-page">
+  <div class="analytics-heading"><div><p class="eyebrow"><span class="eyebrow-dot"></span> YOUR LEARNING DATA</p><h1>Performance <span class="text-accent">Analytics.</span></h1><p class="page-lede">A clear view of recorded activity, quiz evidence, and learning progress. Your reports are private to your account.</p></div><div class="analytics-period-chip"><span>FILTER RANGE</span><strong>{{ scope.filters.cleaned_data.period|default:"Last 30 days" }}</strong></div></div>
+
+  <form class="analytics-filters" method="get" aria-label="Filter learner analytics">
+    <div class="analytics-filter-field"><label for="{{ filters.period.id_for_label }}">Date range</label>{{ filters.period }}</div>
+    <div class="analytics-filter-field"><label for="{{ filters.activity_type.id_for_label }}">Activity type</label>{{ filters.activity_type }}</div>
+    <div class="analytics-filter-field"><label for="{{ filters.topic.id_for_label }}">Topic</label>{{ filters.topic }}</div>
+    <div class="analytics-filter-field course-filter-field"><label for="course-filter">Course</label><select id="course-filter" class="form-select" disabled aria-describedby="course-filter-note"><option>Course tracking unavailable</option></select></div>
+    <button type="submit" class="btn btn-primary-ep">Apply filters <span aria-hidden="true">→</span></button>
+    <p id="course-filter-note" class="analytics-filter-note">Course and enrollment records have not been added, so this filter is disabled.</p>
+    {% if topic_filter_note %}<p class="analytics-filter-note topic-filter-note">Topic filters apply to tagged quizzes, simulations, lessons, and practice. Team challenge activity is not topic-filtered.</p>{% endif %}
+  </form>
+
+  <p class="analytics-scope-note">Date, activity, and topic filters apply to period statistics and charts. Total XP and level use your lifetime account balance.</p>
+  <div class="analytics-kpi-grid">
+    <article class="analytics-kpi-card kpi-xp"><span>TOTAL XP</span><strong>{{ total_xp }}<small> XP</small></strong><p>+{{ xp_in_period }} XP recorded in this range</p><i class="kpi-accent"></i></article>
+    <article class="analytics-kpi-card kpi-level"><span>CURRENT LEVEL</span><strong>{{ level }}</strong><p>{{ xp_into_level }}/100 XP · {{ xp_to_next_level }} XP to next level</p><div class="analytics-level-track"><i style="width: {{ xp_into_level }}%"></i></div></article>
+    <article class="analytics-kpi-card"><span>GAMES COMPLETED</span><strong>{{ games_completed }}</strong><p>Completed game attempts in this range</p><i class="kpi-accent rose-accent"></i></article>
+    <article class="analytics-kpi-card"><span>SIMULATIONS COMPLETED</span><strong>{{ simulations_completed }}</strong><p>Unique simulation completions in this range</p><i class="kpi-accent"></i></article>
+    <article class="analytics-kpi-card"><span>LESSONS COMPLETED</span><strong>{{ lessons_completed }}</strong><p>Published lessons completed in this range</p><i class="kpi-accent"></i></article>
+    <article class="analytics-kpi-card"><span>PRACTICE COMPLETED</span><strong>{{ practice_activities_completed }}</strong><p>Practice activities completed in this range</p><i class="kpi-accent rose-accent"></i></article>
+    <article class="analytics-kpi-card"><span>AVERAGE QUIZ ACCURACY</span>{% if has_quiz_accuracy %}<strong>{{ quiz_accuracy }}<small>%</small></strong><p>{{ quiz_correct_count }} correct of {{ quiz_answer_count }} answers</p>{% else %}<strong class="kpi-na">—</strong><p>Insufficient quiz answers in this filter range</p>{% endif %}<i class="kpi-accent rose-accent"></i></article>
+    <article class="analytics-kpi-card"><span>LEARNING STREAK</span><strong>{{ learning_streak }}<small> days</small></strong><p>{{ active_days }} distinct learning days in this range</p><i class="kpi-accent"></i></article>
+    <article class="analytics-kpi-card kpi-progress"><span>OVERALL LEARNING PROGRESS</span>{% if has_overall_progress %}<strong>{{ overall_progress }}<small>%</small></strong><p>{{ completed_targets }} of {{ catalog_size }} available activities completed in this range</p><div class="analytics-level-track"><i style="width: {{ overall_progress }}%"></i></div>{% else %}<strong class="kpi-na">—</strong><p>No implemented activities match the current filters.</p>{% endif %}</article>
+    <article class="analytics-kpi-card kpi-muted"><span>ACHIEVEMENTS</span><strong>Not tracked</strong><p>Achievement records are not available in the current database.</p><i class="kpi-accent rose-accent"></i></article>
+  </div>
+
+  <div class="analytics-section-heading"><div><p class="analytics-kicker">VISUAL REPORTS</p><h2>Activity over time</h2></div><span class="analytics-badge">{{ scope.period|upper }} VIEW</span></div>
+  <div class="analytics-chart-grid">
+    <article class="analytics-card analytics-chart-card chart-wide"><div class="analytics-card-heading"><div><span class="analytics-kicker">XP PROGRESSION</span><h3>Cumulative XP earned</h3><p>Uses saved quiz, simulation, and team challenge XP awards.</p></div><span class="chart-icon blue-chart-icon">✦</span></div>{% if chart_has_data.xp %}<div class="analytics-canvas-wrap"><canvas id="xp-chart" role="img" aria-label="Cumulative XP earned over the selected date range"></canvas></div><details class="chart-data-details"><summary>View chart data</summary><p>{{ xp_in_period }} XP earned in the selected range. Chart values show the cumulative total through each period bucket.</p></details>{% else %}<div class="analytics-chart-empty"><span aria-hidden="true">✦</span><strong>No XP awards in this range</strong><p>XP appears after a recorded quiz best score, first simulation completion, or completed team challenge.</p></div>{% endif %}</article>
+    <article class="analytics-card analytics-chart-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">LEARNING CONSISTENCY</span><h3>Activity by day or week</h3><p>Games, simulations, lesson and practice progress, and collaboration.</p></div><span class="chart-icon rose-chart-icon">◷</span></div>{% if chart_has_data.activity %}<div class="analytics-canvas-wrap"><canvas id="activity-chart" role="img" aria-label="Learning activity counts over the selected date range"></canvas></div>{% else %}<div class="analytics-chart-empty"><span aria-hidden="true">◷</span><strong>No activity recorded in this range</strong><p>Try a longer date range or complete a learning activity.</p></div>{% endif %}</article>
+    <article class="analytics-card analytics-chart-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">QUIZ TREND</span><h3>Quiz performance</h3><p>Score per completed quiz attempt{% if scope.topic %} for {{ scope.topic.name }}{% endif %}.</p></div><span class="chart-icon blue-chart-icon">▥</span></div>{% if chart_has_data.quiz %}<div class="analytics-canvas-wrap"><canvas id="quiz-chart" role="img" aria-label="Quiz score trend for completed attempts"></canvas></div>{% else %}<div class="analytics-chart-empty"><span aria-hidden="true">▥</span><strong>Quiz trend needs completed attempts</strong><p>There is no quiz score data matching these filters.</p></div>{% endif %}</article>
+    <article class="analytics-card analytics-chart-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">TOPIC MASTERY</span><h3>Observed topic accuracy</h3><p>Topics show only after {{ min_topic_answers }} answers across {{ min_topic_questions }} distinct questions.</p></div><span class="chart-icon rose-chart-icon">⌁</span></div>{% if chart_has_data.topics %}<div class="analytics-canvas-wrap topic-canvas-wrap"><canvas id="topic-chart" role="img" aria-label="Observed quiz accuracy across evidence-backed topics"></canvas></div>{% else %}<div class="analytics-chart-empty"><span aria-hidden="true">⌁</span><strong>Topic evidence is still building</strong><p>Answer more tagged quiz questions to unlock a topic comparison.</p></div>{% endif %}</article>
+    <article class="analytics-card analytics-chart-card chart-wide"><div class="analytics-card-heading"><div><span class="analytics-kicker">ACTIVITY MIX</span><h3>Activity distribution</h3><p>Recorded completions, simulation runs, and team challenge activity.</p></div><span class="chart-icon blue-chart-icon">◉</span></div>{% if chart_has_data.distribution %}<div class="analytics-canvas-wrap distribution-canvas-wrap"><canvas id="distribution-chart" role="img" aria-label="Distribution of completed learning activities by type"></canvas></div>{% else %}<div class="analytics-chart-empty"><span aria-hidden="true">◉</span><strong>No activity distribution yet</strong><p>Activity types appear after your first recorded completion or team challenge action.</p></div>{% endif %}</article>
+  </div>
+
+  {{ charts.xp|json_script:"analytics-xp-data" }}
+  {{ charts.activity|json_script:"analytics-activity-data" }}
+  {{ charts.quiz|json_script:"analytics-quiz-data" }}
+  {{ charts.topics|json_script:"analytics-topics-data" }}
+  {{ charts.distribution|json_script:"analytics-distribution-data" }}
+
+  <div class="analytics-lower-grid">
+    <section class="analytics-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">RULE-BASED ANALYSIS</span><h3>Learning insights</h3><p>Facts are separated from suggested next steps.</p></div><span class="chart-icon rose-chart-icon">✧</span></div>
+      {% if has_insights %}<div class="analytics-insight-columns">{% if facts %}<div class="insight-group"><h4><span class="insight-label-dot fact-dot"></span>Observed facts</h4><ul>{% for fact in facts %}<li>{{ fact }}</li>{% endfor %}</ul></div>{% endif %}{% if recommendations %}<div class="insight-group recommendation-group"><h4><span class="insight-label-dot recommendation-dot"></span>Recommendations</h4><ul>{% for recommendation in recommendations %}<li>{{ recommendation }}</li>{% endfor %}</ul><a class="analytics-text-link" href="{% url 'adaptive_learning' %}">Review adaptive learning →</a></div>{% endif %}</div>{% else %}<div class="analytics-chart-empty insight-empty"><strong>More learning evidence is needed</strong><p>Insights appear when there are enough completed quiz answers, repeated topic questions, or learning days. No performance judgments are shown yet.</p></div>{% endif %}
+    </section>
+    <section class="analytics-card"><div class="analytics-card-heading"><div><span class="analytics-kicker">RECENT RECORDS</span><h3>Learning activity</h3><p>Events matching the selected filters.</p></div><span class="chart-icon blue-chart-icon">⌁</span></div>
+      {% if recent_activity %}<ul class="analytics-recent-list">{% for activity in recent_activity %}<li><span class="recent-kind-icon kind-{{ activity.kind }}">{% if activity.kind == "simulation" %}◉{% elif activity.kind == "collaboration" %}◎{% else %}✦{% endif %}</span><div><strong>{{ activity.title }}</strong><small>{{ activity.detail }} · {{ activity.date|date:"M j, Y · g:i A" }}</small></div>{% if activity.xp %}<span class="recent-xp">+{{ activity.xp }} XP</span>{% endif %}</li>{% endfor %}</ul>{% else %}<div class="analytics-chart-empty insight-empty"><strong>No recent activity</strong><p>There are no matching saved learning records for this filter range.</p></div>{% endif %}
+    </section>
+  </div>
+</section>
+{% endblock %}
+{% block extra_scripts %}{{ block.super }}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" defer></script><script src="{% static 'js/analytics.js' %}" defer></script>{% endblock %}

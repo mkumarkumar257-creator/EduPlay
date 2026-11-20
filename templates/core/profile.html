@@ -1,0 +1,21 @@
+{% extends "app_base.html" %}
+{% block title %}My profile — EduPlay{% endblock %}
+{% block app_page_title %}My Profile{% endblock %}
+{% block content %}
+<section class="profile-section"><div class="container profile-container">
+  <div class="profile-heading"><p class="eyebrow"><span class="eyebrow-dot"></span> ACCOUNT SETTINGS</p><h1>Your <span class="text-accent">profile.</span></h1><p class="page-lede">Update your contact details. Your role and username are managed separately for account safety.</p></div>
+  <div class="profile-grid">
+    <section class="profile-card"><div class="profile-card-heading"><div class="profile-avatar" aria-hidden="true">{{ user.first_name|default:user.username|first|upper }}</div><div><span class="eyebrow">EDUPLAY ACCOUNT</span><h2>{{ user.get_full_name|default:user.username }}</h2><span class="profile-role">{{ user.get_role_display }}</span></div></div>
+      {% if form.non_field_errors %}<div class="form-error-banner" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      <form method="post" class="ep-form profile-form" novalidate>{% csrf_token %}
+        <div class="field-group"><label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>{{ form.full_name }}{% for error in form.full_name.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>
+        <div class="field-group"><label for="id_username_readonly">Username</label><input id="id_username_readonly" class="form-control" type="text" value="{{ user.username }}" readonly aria-describedby="username-help"><small id="username-help" class="field-help">Usernames cannot be changed from profile settings.</small></div>
+        <div class="field-group"><label for="{{ form.email.id_for_label }}">Email</label>{{ form.email }}{% for error in form.email.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>
+        <div class="field-group"><label for="id_role_readonly">Role</label><input id="id_role_readonly" class="form-control" type="text" value="{{ user.get_role_display }}" readonly aria-describedby="role-help"><small id="role-help" class="field-help">Role changes are not available through profile editing.</small></div>
+        <button class="btn btn-primary-ep auth-submit" type="submit">Save profile <span aria-hidden="true">↗</span></button>
+      </form>
+    </section>
+    <aside class="profile-card account-details-card"><p class="eyebrow">ACCOUNT INFORMATION</p><h2>Account details</h2><div class="account-detail-row"><span>Account created</span><strong>{{ user.date_joined|date:"M j, Y" }}</strong></div><div class="account-detail-row"><span>Last sign in</span><strong>{% if user.last_login %}{{ user.last_login|date:"M j, Y · g:i A" }}{% else %}Not recorded yet{% endif %}</strong></div><div class="account-detail-row"><span>Account status</span><strong class="account-active"><i></i> Active</strong></div><p class="account-security-note">Your password is stored using Django’s password hashing system. Password changes can be added as a separate account flow.</p></aside>
+  </div>
+</div></section>
+{% endblock %}

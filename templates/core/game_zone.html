@@ -1,0 +1,25 @@
+{% extends "app_base.html" %}
+{% block title %}Game Zone — EduPlay{% endblock %}
+{% block app_page_title %}Game Zone{% endblock %}
+{% block content %}
+<section class="game-zone-page">
+  <div class="game-zone-heading"><div><p class="eyebrow"><span class="eyebrow-dot"></span> PLAY TO LEARN</p><h1>Welcome to the <span class="text-accent">Game Zone.</span></h1><p class="page-lede">Take on a short challenge, check what you know, and earn XP as your skills improve.</p></div><div class="xp-total-chip"><span aria-hidden="true">✦</span><strong>{{ user.total_xp }} XP</strong><small>your total</small></div></div>
+
+  <div class="game-category-block"><span class="game-category-caption">CATEGORIES</span><div class="game-category-list">{% for key, label in categories %}<span class="game-category-chip"><i aria-hidden="true"></i>{{ label }}</span>{% endfor %}</div></div>
+
+  <div class="game-section-heading"><div><p class="eyebrow">READY WHEN YOU ARE</p><h2>Available games</h2></div><span class="game-count">{{ games|length }} listed</span></div>
+  {% if games %}<div class="game-card-grid">
+    {% for item in games %}
+      <article class="game-card{% if item.playable %} game-card-ready{% endif %}">
+        <div class="game-card-top"><span class="game-card-icon{% if item.playable %} game-card-icon-ready{% endif %}" aria-hidden="true">{% if item.playable %}✦{% else %}◌{% endif %}</span><span class="game-status{% if item.playable %} game-status-ready{% endif %}"><i></i>{% if item.playable %}Ready to play{% else %}Coming soon{% endif %}</span></div>
+        <p class="game-category-name">{{ item.game.get_category_display }}</p><h3>{{ item.game.title }}</h3><p class="game-description">{{ item.game.description }}</p>
+        <div class="game-meta"><span>{{ item.game.get_difficulty_display }}</span><span>{{ item.question_count }} questions</span><span>{{ item.game.time_limit_seconds }} sec</span><strong>{{ item.game.xp_reward }} XP</strong></div>
+        {% if item.playable %}<a class="btn btn-primary-ep game-play-button" href="{% if item.game.slug == 'quiz-challenge' %}{% url 'quiz_challenge' %}{% else %}{% url 'content_quiz_instructions' slug=item.game.slug %}{% endif %}">Play {{ item.game.title }} <span aria-hidden="true">→</span></a>{% else %}<button class="btn game-disabled-button" type="button" disabled>Not ready</button>{% endif %}
+      </article>
+    {% endfor %}
+  </div>{% else %}<div class="game-empty-state"><span class="empty-state-icon" aria-hidden="true">⌁</span><strong>No games are available yet</strong><p>Check back soon for the first learning challenge.</p></div>{% endif %}
+
+  <div class="game-section-heading upcoming-heading"><div><p class="eyebrow">ON THE ROADMAP</p><h2>More ways to play</h2></div></div>
+  <div class="game-card-grid upcoming-game-grid">{% for upcoming in upcoming_games %}<article class="game-card game-card-upcoming"><div class="game-card-top"><span class="game-card-icon" aria-hidden="true">{{ upcoming.icon }}</span><span class="game-status"><i></i>Coming soon</span></div><p class="game-category-name">{{ upcoming.category }}</p><h3>{{ upcoming.title }}</h3><p class="game-description">{{ upcoming.description }}</p><div class="game-meta"><span>{{ upcoming.difficulty }}</span></div><button class="btn game-disabled-button" type="button" disabled>Coming soon</button></article>{% endfor %}</div>
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "app_base.html" %}
+{% block title %}Simulation Lab — EduPlay{% endblock %}
+{% block app_page_title %}Simulation Lab{% endblock %}
+{% block content %}
+<section class="simulation-lab-page">
+  <div class="simulation-lab-heading">
+    <div>
+      <p class="eyebrow"><span class="eyebrow-dot"></span> EXPERIMENT · OBSERVE · LEARN</p>
+      <h1>Welcome to the <span class="text-accent">Simulation Lab.</span></h1>
+      <p class="page-lede">Explore interactive models, adjust the conditions, and see how systems respond. Each experiment is an educational estimate, not a real hardware benchmark.</p>
+    </div>
+    <div class="simulation-completion-chip"><span aria-hidden="true">✓</span><strong>{{ completed_count }}</strong><small>simulations completed</small></div>
+  </div>
+
+  <div class="simulation-category-block"><span class="simulation-category-caption">EXPERIMENT CATEGORIES</span><div class="simulation-category-list">{% for key, label in categories %}<span class="simulation-category-chip"><i aria-hidden="true"></i>{{ label }}</span>{% endfor %}</div></div>
+
+  <div class="simulation-section-heading"><div><p class="eyebrow">YOUR EXPERIMENTS</p><h2>Available simulations</h2></div><span class="simulation-count">{{ cards|length }} listed</span></div>
+  {% if cards %}<div class="simulation-card-grid">
+    {% for item in cards %}
+      <article class="simulation-card{% if item.playable %} simulation-card-ready{% endif %}{% if item.completed %} simulation-card-completed{% endif %}">
+        <div class="simulation-card-top"><span class="simulation-card-icon{% if item.playable %} simulation-card-icon-ready{% endif %}" aria-hidden="true">{{ item.simulation.icon }}</span><span class="simulation-status{% if item.completed %} simulation-status-complete{% elif item.playable %} simulation-status-ready{% endif %}"><i></i>{% if item.completed %}Completed{% elif item.playable %}Ready to start{% else %}Coming soon{% endif %}</span></div>
+        <p class="simulation-category-name">{{ item.simulation.get_category_display }}</p><h3>{{ item.simulation.title }}</h3><p class="simulation-description">{{ item.simulation.description }}</p>
+        <div class="simulation-meta"><span>{{ item.simulation.get_difficulty_display }}</span><span>About {{ item.simulation.estimated_duration_minutes }} min</span><strong>{{ item.simulation.xp_reward }} XP first completion</strong></div>
+        {% if item.playable %}<div class="simulation-card-foot"><span>{% if item.completed %}{{ item.attempt_count }} experiment{{ item.attempt_count|pluralize }} saved{% else %}Not started yet{% endif %}</span><a class="btn btn-primary-ep simulation-start-button" href="{% url 'simulation_detail' slug=item.simulation.slug %}">{% if item.completed %}Run again{% else %}Start Experiment{% endif %}<span aria-hidden="true">→</span></a></div>{% else %}<button class="btn simulation-disabled-button" type="button" disabled>Coming soon</button>{% endif %}
+      </article>
+    {% endfor %}
+  </div>{% else %}<div class="simulation-empty-state"><span class="empty-state-icon" aria-hidden="true">◉</span><strong>No simulations are available yet</strong><p>Check back soon for the first experiment.</p></div>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}Preview {{ content.title }} — Content Studio{% endblock %}
+{% block app_page_title %}Content Preview{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/content_studio.css' %}">{% endblock %}
+{% block content %}
+<section class="studio-page content-preview-page">
+  <div class="studio-heading"><div><p class="eyebrow"><span class="eyebrow-dot"></span> EDUCATOR PREVIEW · {{ content_type_label|upper }}</p><h1>{{ content.title }}</h1><p class="page-lede">Preview mode. This content is not being shown to learners unless it is published and public.</p></div><a class="studio-back-link" href="{% url 'educator_content_edit' content_type=content_type pk=content.pk %}">← Back to editor</a></div>
+  <div class="studio-status-banner status-{{ content.status }}"><span>Status</span><strong>{{ content.get_status_display }}</strong><span>{{ content.get_visibility_display }} visibility</span></div>
+  <article class="learner-detail-card"><p class="learner-content-description">{{ content.description }}</p>
+    {% if content_type == 'quiz' %}<div class="preview-quiz-facts"><span>{{ questions|length }} active questions</span><span>{{ content.time_limit_seconds }} seconds</span><span>{{ content.xp_reward }} XP max</span></div>{% for question in questions %}<section class="preview-question"><span>QUESTION {{ forloop.counter }} · {{ question.get_difficulty_display }}</span><h2>{{ question.prompt }}</h2><ol type="A"><li>{{ question.option_a }}{% if question.correct_option == 'A' %} <b>Correct</b>{% endif %}</li><li>{{ question.option_b }}{% if question.correct_option == 'B' %} <b>Correct</b>{% endif %}</li><li>{{ question.option_c }}{% if question.correct_option == 'C' %} <b>Correct</b>{% endif %}</li><li>{{ question.option_d }}{% if question.correct_option == 'D' %} <b>Correct</b>{% endif %}</li></ol>{% if question.explanation %}<p>{{ question.explanation }}</p>{% endif %}</section>{% empty %}<p class="studio-empty-inline">Add questions to preview this quiz.</p>{% endfor %}
+    {% elif content_type == 'lesson' %}<h2>Learning objectives</h2><div class="lesson-body">{{ content.learning_objectives|linebreaks }}</div><div class="lesson-body">{{ content.body|linebreaks }}</div>
+    {% elif content_type == 'practice' %}<h2>Learning objectives</h2><div class="lesson-body">{{ content.learning_objectives|linebreaks }}</div><h2>Instructions</h2><div class="lesson-body">{{ content.instructions|linebreaks }}</div><h3>Completion criteria</h3><div class="lesson-body">{{ content.completion_criteria|linebreaks }}</div>
+    {% else %}<p>{{ content.get_category_display }} · {{ content.get_difficulty_display }} · {{ content.xp_reward }} XP</p><h2>Instructions</h2><div class="lesson-body">{{ content.instructions|linebreaks }}</div><h3>Completion criteria</h3><div class="lesson-body">{{ content.completion_criteria|linebreaks }}</div>{% endif %}
+  </article>
+</section>
+{% endblock %}

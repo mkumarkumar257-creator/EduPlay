@@ -1,0 +1,31 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}Content Studio — EduPlay{% endblock %}
+{% block app_page_title %}Content Studio{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/content_studio.css' %}">{% endblock %}
+{% block content %}
+<section class="studio-page">
+  <div class="studio-heading"><div><p class="eyebrow"><span class="eyebrow-dot"></span> EDUCATOR WORKSPACE</p><h1>Content <span class="text-accent">Studio.</span></h1><p class="page-lede">Create and manage your quizzes, lessons, team challenges, and practice activities.</p></div><a class="btn btn-primary-ep" href="{% url 'educator_content_create' %}">＋ Create content</a></div>
+  <div class="studio-scope-note"><span aria-hidden="true">i</span><p>This library shows content owned by your educator account. Drafts and private items are not available to learners.</p></div>
+  <form class="studio-filter-bar" method="get" aria-label="Filter content library">
+    <div class="studio-field"><label for="{{ filters.content_type.id_for_label }}">Content type</label>{{ filters.content_type }}</div>
+    <div class="studio-field"><label for="{{ filters.status.id_for_label }}">Status</label>{{ filters.status }}</div>
+    <div class="studio-field"><label for="{{ filters.subject.id_for_label }}">Subject</label>{{ filters.subject }}</div>
+    <button class="btn btn-primary-ep" type="submit">Filter</button>
+    <a class="studio-clear-filter" href="{% url 'educator_content_library' %}">Clear filters</a>
+  </form>
+  <div class="studio-list-heading"><div><span class="studio-kicker">YOUR LIBRARY</span><h2>{{ content_items|length }} item{{ content_items|length|pluralize }}</h2></div></div>
+  {% if content_items %}<div class="studio-library-list">
+    {% for row in content_items %}<article class="studio-library-card">
+      <div class="studio-library-main"><div class="studio-library-meta"><span class="content-type-pill type-{{ row.type }}">{{ row.type_label }}</span><span class="studio-status-pill status-{{ row.item.status }}">{{ row.item.get_status_display }}</span><span class="studio-visibility-pill">{{ row.item.get_visibility_display }}</span></div><h3>{{ row.item.title }}</h3><p>{{ row.item.description|truncatewords:24 }}</p><div class="studio-library-submeta"><span>{{ row.item.subject|default:"No subject" }}</span>{% if row.item.topic %}<span>{{ row.item.topic.name }}</span>{% endif %}<span>Updated {{ row.item.updated_at|date:"M j, Y" }}</span></div></div>
+      <div class="studio-stat-strip"><div><strong>{{ row.stats.views }}</strong><span>Views</span></div><div><strong>{{ row.stats.attempts }}</strong><span>{% if row.type == 'quiz' %}Attempts{% elif row.type == 'challenge' %}Team starts{% else %}Learners{% endif %}</span></div><div><strong>{{ row.stats.completions }}</strong><span>Completions</span></div><div><strong>{% if row.stats.average_score != None %}{{ row.stats.average_score }}%{% else %}—{% endif %}</strong><span>Average score</span></div><div><strong>{% if row.stats.completion_rate != None %}{{ row.stats.completion_rate }}%{% else %}—{% endif %}</strong><span>Completion rate</span></div></div>
+      <div class="studio-card-actions"><a class="studio-action-link" href="{% url 'educator_content_edit' content_type=row.type pk=row.item.pk %}">Edit</a><a class="studio-action-link" href="{% url 'educator_content_preview' content_type=row.type pk=row.item.pk %}">Preview</a>
+        {% if row.item.status == 'draft' or row.item.status == 'unpublished' %}<form method="post" action="{% url 'educator_content_action' content_type=row.type pk=row.item.pk action='publish' %}">{% csrf_token %}<button class="studio-action-link action-publish" type="submit">Publish</button></form>{% endif %}
+        {% if row.item.status == 'published' %}<form method="post" action="{% url 'educator_content_action' content_type=row.type pk=row.item.pk action='unpublish' %}">{% csrf_token %}<button class="studio-action-link" type="submit">Unpublish</button></form>{% endif %}
+        {% if row.item.status != 'archived' %}<form method="post" action="{% url 'educator_content_action' content_type=row.type pk=row.item.pk action='archive' %}">{% csrf_token %}<button class="studio-action-link action-archive" type="submit">Archive</button></form>{% endif %}
+        <form method="post" action="{% url 'educator_content_action' content_type=row.type pk=row.item.pk action='delete' %}" data-delete-form>{% csrf_token %}<button class="studio-action-link action-delete" type="submit">Delete</button></form>
+      </div>
+    </article>{% endfor %}
+  </div>{% else %}<div class="studio-empty-state"><span class="studio-empty-icon" aria-hidden="true">▧</span><strong>No matching content yet</strong><p>Create a quiz, lesson, challenge, or practice activity. New items start as private drafts.</p><a class="btn btn-primary-ep" href="{% url 'educator_content_create' %}">Create your first item</a></div>{% endif %}
+</section>
+{% endblock %}

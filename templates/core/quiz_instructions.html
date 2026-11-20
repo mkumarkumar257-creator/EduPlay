@@ -1,0 +1,16 @@
+{% extends "app_base.html" %}
+{% block title %}Quiz Challenge — EduPlay{% endblock %}
+{% block app_page_title %}Quiz Challenge{% endblock %}
+{% block content %}
+<section class="quiz-page">
+  <a class="quiz-back-link" href="{% url 'game_zone' %}"><span aria-hidden="true">←</span> Back to Game Zone</a>
+  <div class="quiz-instructions-card">
+    <span class="quiz-emblem" aria-hidden="true">✦</span><span class="game-status game-status-ready"><i></i> Ready to play</span>
+    <p class="eyebrow">{{ game.get_category_display }} · {{ game.get_difficulty_display }}</p>
+    <h1>{{ game.title }}</h1><p class="quiz-intro">{{ game.description }}</p>
+    <div class="quiz-fact-grid"><div><span>QUESTIONS</span><strong>{{ question_count }}</strong></div><div><span>TIME LIMIT</span><strong>{{ game.time_limit_seconds }} sec</strong></div><div><span>TOP REWARD</span><strong>{{ game.xp_reward }} XP</strong></div></div>
+    <div class="quiz-rules"><h2>Before you begin</h2><ul><li>Answer each multiple-choice question before time runs out.</li><li>Choose one of four options. Feedback appears after each answer.</li><li>XP is based on your score. Replays award only the difference when you beat your previous best, up to the listed reward.</li></ul></div>
+    <form method="post" action="{% if game.slug == 'quiz-challenge' %}{% url 'start_quiz' %}{% else %}{% url 'content_quiz_start' slug=game.slug %}{% endif %}">{% csrf_token %}<button class="btn btn-primary-ep quiz-start-button" type="submit">{% if game.slug == 'quiz-challenge' %}Start challenge{% else %}Start quiz{% endif %} <span aria-hidden="true">→</span></button></form>
+  </div>
+</section>
+{% endblock %}

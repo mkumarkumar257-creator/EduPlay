@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block site_header %}{% endblock %}
+{% block site_footer %}{% endblock %}
+{% block page_body %}
+<div class="app-layout">
+  <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="appSidebar" aria-labelledby="appSidebarLabel">
+    <div class="offcanvas-header app-sidebar-header">
+      <a class="navbar-brand brand-lockup" href="{% url 'home' %}" aria-label="EduPlay home">
+        <span class="brand-mark" aria-hidden="true"><span>e</span><i></i></span>
+        <span class="brand-word">Edu<span>Play</span><small>LEARN · PLAY · LEVEL UP</small></span>
+      </a>
+      <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" aria-label="Close navigation"></button>
+    </div>
+    <div class="offcanvas-body app-sidebar-body">
+      <div class="sidebar-role-label"><span class="sidebar-role-dot"></span>{{ user.get_role_display }} workspace</div>
+      <nav class="app-side-nav" aria-label="Workspace navigation">
+        {% if user.role == "learner" %}
+          <p class="sidebar-group-label">LEARNER</p>
+          <a class="side-link{% if active_nav == 'dashboard' %} active{% endif %}" href="{% url 'learner_dashboard' %}"{% if active_nav == 'dashboard' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">⌂</span><span>Dashboard</span></a>
+          <a class="side-link{% if active_nav == 'my-learning' %} active{% endif %}" href="{% url 'learner_content_library' %}"{% if active_nav == 'my-learning' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">▤</span><span>Learning Modules</span></a>
+          <a class="side-link{% if active_nav == 'progress' %} active{% endif %}" href="{% url 'learner_content_progress' %}"{% if active_nav == 'progress' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">◷</span><span>My Progress</span></a>
+          <a class="side-link{% if active_nav == 'game-zone' %} active{% endif %}" href="{% url 'game_zone' %}"{% if active_nav == 'game-zone' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">✦</span><span>Game Zone</span></a>
+          <a class="side-link{% if active_nav == 'simulation-lab' %} active{% endif %}" href="{% url 'simulation_lab' %}"{% if active_nav == 'simulation-lab' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">◉</span><span>Simulation Lab</span></a>
+          <a class="side-link{% if active_nav == 'adaptive-learning' %} active{% endif %}" href="{% url 'adaptive_learning' %}"{% if active_nav == 'adaptive-learning' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">⌁</span><span>Adaptive Learning</span></a>
+          <a class="side-link{% if active_nav == 'collaboration' %} active{% endif %}" href="{% url 'collaboration_hub' %}"{% if active_nav == 'collaboration' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">◎</span><span>Collaboration Hub</span></a>
+          <a class="side-link{% if active_nav == 'analytics' %} active{% endif %}" href="{% url 'learner_analytics' %}"{% if active_nav == 'analytics' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">▥</span><span>Performance Analytics</span></a>
+          <a class="side-link{% if active_nav == 'achievements' %} active{% endif %}" href="{% url 'workspace_placeholder' feature='achievements' %}"{% if active_nav == 'achievements' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">✳</span><span>Achievements</span><small>soon</small></a>
+          <a class="side-link{% if active_nav == 'leaderboard' %} active{% endif %}" href="{% url 'workspace_placeholder' feature='leaderboard' %}"{% if active_nav == 'leaderboard' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">↗</span><span>Leaderboard</span><small>soon</small></a>
+        {% else %}
+          <p class="sidebar-group-label">EDUCATOR</p>
+          <a class="side-link{% if active_nav == 'dashboard' %} active{% endif %}" href="{% url 'educator_dashboard' %}"{% if active_nav == 'dashboard' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">⌂</span><span>Dashboard</span></a>
+          <a class="side-link{% if active_nav == 'my-courses' %} active{% endif %}" href="{% url 'workspace_placeholder' feature='my-courses' %}"{% if active_nav == 'my-courses' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">▤</span><span>My Courses</span><small>soon</small></a>
+          <a class="side-link{% if active_nav == 'learners' %} active{% endif %}" href="{% url 'workspace_placeholder' feature='learners' %}"{% if active_nav == 'learners' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">◎</span><span>Learners</span><small>soon</small></a>
+          <a class="side-link{% if active_nav == 'content-library' %} active{% endif %}" href="{% url 'educator_content_library' %}"{% if active_nav == 'content-library' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">▧</span><span>Content Library</span></a>
+          <a class="side-link{% if active_nav == 'create-content' %} active{% endif %}" href="{% url 'educator_content_create' %}"{% if active_nav == 'create-content' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">＋</span><span>Create Learning Content</span></a>
+          <a class="side-link{% if active_nav == 'analytics' %} active{% endif %}" href="{% url 'educator_analytics' %}"{% if active_nav == 'analytics' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">▥</span><span>Analytics</span></a>
+        {% endif %}
+        <p class="sidebar-group-label sidebar-group-secondary">ACCOUNT</p>
+        <a class="side-link{% if active_nav == 'profile' %} active{% endif %}" href="{% url 'profile' %}"{% if active_nav == 'profile' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">◌</span><span>My Profile</span></a>
+        <a class="side-link{% if active_nav == 'settings' %} active{% endif %}" href="{% url 'workspace_placeholder' feature='settings' %}"{% if active_nav == 'settings' %} aria-current="page"{% endif %}><span class="side-icon" aria-hidden="true">⚙</span><span>Settings</span><small>soon</small></a>
+      </nav>
+      <div class="sidebar-bottom-card"><span class="sidebar-bottom-spark" aria-hidden="true">✦</span><p><strong>Keep leveling up.</strong><br>New learning tools are on the way.</p></div>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <button class="app-menu-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" aria-label="Open workspace navigation"><span></span><span></span><span></span></button>
+      <div class="topbar-page-context"><span>EDUPLAY</span><i aria-hidden="true">/</i><strong>{% block app_page_title %}Workspace{% endblock %}</strong></div>
+      <div class="topbar-actions">
+        <button class="notification-placeholder" type="button" aria-label="Notifications, coming soon" title="Notifications coming soon" disabled><span class="notification-bell" aria-hidden="true">♧</span><span class="notification-label">Notifications</span><small>soon</small></button>
+        <span class="topbar-divider" aria-hidden="true"></span>
+        <a class="topbar-profile" href="{% url 'profile' %}" aria-label="Open profile for {{ user.get_full_name|default:user.username }}"><span class="topbar-avatar" aria-hidden="true">{{ user.first_name|default:user.username|first|upper }}</span><span class="topbar-user-copy"><strong>{{ user.get_full_name|default:user.username }}</strong><small>{{ user.get_role_display }}</small></span></a>
+        <form method="post" action="{% url 'logout' %}" class="topbar-logout">{% csrf_token %}<button type="submit" class="topbar-logout-button">Log out</button></form>
+      </div>
+    </header>
+    <main id="main-content" class="app-page-content">
+      {% if messages %}<div class="app-message-stack" aria-live="polite">{% for message in messages %}<div class="alert alert-ep alert-{{ message.tags|default:'info' }} mb-2" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}
+      {% block content %}{% endblock %}
+      <footer class="app-footer"><span>EduPlay · Learn. Play. Level Up.</span><span>Learning tools are being built in phases.</span></footer>
+    </main>
+  </div>
+</div>
+{% endblock %}

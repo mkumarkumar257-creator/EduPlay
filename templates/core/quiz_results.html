@@ -1,0 +1,16 @@
+{% extends "app_base.html" %}
+{% block title %}{{ attempt.game.title }} results — EduPlay{% endblock %}
+{% block app_page_title %}Quiz Results{% endblock %}
+{% block content %}
+<section class="quiz-page quiz-results-page">
+  <article class="quiz-results-card">
+    <span class="results-emblem{% if attempt.status == 'completed' %} results-emblem-complete{% endif %}" aria-hidden="true">{% if attempt.status == 'completed' %}✦{% else %}◷{% endif %}</span>
+    {% if attempt.status == "completed" %}<p class="eyebrow">QUIZ COMPLETE</p><h1>{% if score_percent == 100 %}Perfect run, {{ user.first_name|default:user.username }}!{% elif score_percent >= 70 %}Great work, {{ user.first_name|default:user.username }}!{% else %}Nice effort, {{ user.first_name|default:user.username }}.{% endif %}</h1><p class="results-lede">You finished {{ attempt.game.title }}. Review your result and try again whenever you’re ready.</p>{% elif attempt.status == "timed_out" %}<p class="eyebrow">TIME IS UP</p><h1>Quiz ended.</h1><p class="results-lede">Your submitted answers were saved. You can start a fresh attempt when you’re ready.</p>{% else %}<p class="eyebrow">ATTEMPT CLOSED</p><h1>This run was set aside.</h1><p class="results-lede">Start a fresh quiz to continue.</p>{% endif %}
+
+    <div class="results-score-grid"><div class="result-score-ring"><strong>{{ score_percent }}<small>%</small></strong><span>SCORE</span></div><div class="results-score-detail"><div><span>Correct answers</span><strong>{{ attempt.correct_answers }} <small>of {{ attempt.total_questions }}</small></strong></div><div><span>Questions answered</span><strong>{{ answered_count }} <small>of {{ attempt.total_questions }}</small></strong></div><div><span>XP earned this round</span><strong class="result-xp">+{{ attempt.xp_awarded }} <small>XP</small></strong></div></div></div>
+    {% if attempt.status == "completed" and not attempt.xp_awarded %}<p class="xp-explanation">This result did not improve your previous best score, so no additional XP was awarded. Your best-score XP is capped at {{ attempt.game.xp_reward }} per game.</p>{% elif attempt.status == "completed" %}<p class="xp-explanation">XP is awarded for a new personal best. Your account now has <strong>{{ user.total_xp }} XP</strong>.</p>{% else %}<p class="xp-explanation">Timed-out or unfinished runs do not award XP.</p>{% endif %}
+
+    <div class="results-actions"><form method="post" action="{% if attempt.game.slug == 'quiz-challenge' %}{% url 'start_quiz' %}{% else %}{% url 'content_quiz_start' slug=attempt.game.slug %}{% endif %}">{% csrf_token %}<button class="btn btn-primary-ep" type="submit">Try again <span aria-hidden="true">↻</span></button></form><a class="btn btn-quiet" href="{% url 'game_zone' %}">Back to Game Zone</a></div>
+  </article>
+</section>
+{% endblock %}

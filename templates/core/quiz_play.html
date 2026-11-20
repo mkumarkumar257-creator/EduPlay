@@ -1,0 +1,17 @@
+{% extends "app_base.html" %}
+{% block title %}Quiz Challenge · Question {{ question_number }} — EduPlay{% endblock %}
+{% block app_page_title %}Quiz Challenge{% endblock %}
+{% block content %}
+<section class="quiz-page quiz-play-page">
+  <div class="quiz-run-topline"><a class="quiz-back-link" href="{% url 'game_zone' %}"><span aria-hidden="true">←</span> Exit challenge</a><div class="quiz-timer"><span class="timer-icon" aria-hidden="true">◷</span><span>TIME LEFT</span><strong data-quiz-timer data-seconds="{{ time_remaining }}" aria-live="off">--:--</strong></div></div>
+  <div class="quiz-progress-heading"><div><p class="eyebrow">{{ attempt.game.title|upper }}</p><h1>Question <span>{{ question_number }}</span> <small>of {{ attempt.total_questions }}</small></h1></div><span class="quiz-score-so-far">{{ correct_so_far }} correct · {{ answered_count }} answered</span></div>
+  <div class="quiz-progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress_percent }}"><span style="width: {{ progress_percent }}%"></span></div>
+  <article class="quiz-question-card"><p class="question-kicker">CHOOSE THE BEST ANSWER</p><h2>{{ question.prompt }}</h2>
+    <form id="quiz-answer-form" class="quiz-answer-form" method="post" action="{% url 'submit_quiz_answer' attempt_id=attempt.pk %}">{% csrf_token %}<input type="hidden" name="question_id" value="{{ question.pk }}">
+      <div class="quiz-options">{% for option in options %}<button class="quiz-option" type="submit" name="option" value="{{ option.0 }}"><span class="quiz-option-letter">{{ option.0 }}</span><span>{{ option.1 }}</span><span class="quiz-option-arrow" aria-hidden="true">→</span></button>{% endfor %}</div>
+    </form>
+    <p class="quiz-answer-hint"><span aria-hidden="true">i</span> Select an option to lock in your answer and see feedback.</p>
+  </article>
+  <form id="quiz-timeout-form" class="visually-hidden" method="post" action="{% url 'submit_quiz_answer' attempt_id=attempt.pk %}">{% csrf_token %}</form>
+</section>
+{% endblock %}

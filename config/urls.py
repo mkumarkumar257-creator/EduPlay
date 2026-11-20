@@ -1,0 +1,70 @@
+"""URL configuration for EduPlay."""
+from django.contrib import admin
+from django.urls import path
+
+from core import views
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", views.home, name="home"),
+    path("about/", views.about, name="about"),
+    path("dashboard/", views.dashboard, name="dashboard"),
+    path("dashboard/learner/", views.learner_dashboard, name="learner_dashboard"),
+    path("dashboard/educator/", views.educator_dashboard, name="educator_dashboard"),
+    path("game-zone/", views.game_zone, name="game_zone"),
+    path("game-zone/quiz-challenge/", views.quiz_challenge, name="quiz_challenge"),
+    path("game-zone/quiz-challenge/start/", views.start_quiz, name="start_quiz"),
+    path("game-zone/quiz-challenge/attempt/<uuid:attempt_id>/", views.quiz_attempt, name="quiz_attempt"),
+    path("game-zone/quiz-challenge/attempt/<uuid:attempt_id>/answer/", views.submit_quiz_answer, name="submit_quiz_answer"),
+    path("simulation-lab/", views.simulation_lab, name="simulation_lab"),
+    path("simulation-lab/<slug:slug>/", views.simulation_detail, name="simulation_detail"),
+    path("simulation-lab/<slug:slug>/run/", views.run_simulation, name="run_simulation"),
+    path("adaptive-learning/", views.adaptive_learning, name="adaptive_learning"),
+    path("analytics/learner/", views.learner_analytics, name="learner_analytics"),
+    path("analytics/educator/", views.educator_analytics, name="educator_analytics"),
+    path("educator/content/", views.educator_content_library, name="educator_content_library"),
+    path("educator/content/create/", views.educator_content_create, name="educator_content_create"),
+    path("educator/content/new/<slug:content_type>/", views.educator_content_new, name="educator_content_new"),
+    path("educator/content/<slug:content_type>/<int:pk>/edit/", views.educator_content_edit, name="educator_content_edit"),
+    path("educator/content/<slug:content_type>/<int:pk>/preview/", views.educator_content_preview, name="educator_content_preview"),
+    path("educator/content/<slug:content_type>/<int:pk>/<slug:action>/", views.educator_content_action, name="educator_content_action"),
+    path("learning/", views.learner_content_library, name="learner_content_library"),
+    path("learning/progress/", views.learner_content_progress, name="learner_content_progress"),
+    path("learning/quizzes/<slug:slug>/", views.content_quiz_instructions, name="content_quiz_instructions"),
+    path("learning/quizzes/<slug:slug>/start/", views.start_quiz, name="content_quiz_start"),
+    path("learning/<slug:content_type>/<slug:slug>/", views.learner_content_detail, name="learner_content_detail"),
+    path("learning/<slug:content_type>/<int:pk>/complete/", views.learner_content_complete, name="learner_content_complete"),
+    path("collaboration/", views.collaboration_hub, name="collaboration_hub"),
+    path("collaboration/teams/create/", views.collaboration_create_team, name="collaboration_create_team"),
+    path("collaboration/teams/join/", views.collaboration_join_team, name="collaboration_join_team"),
+    path("collaboration/teams/<int:team_id>/", views.collaboration_team, name="collaboration_team"),
+    path("collaboration/teams/<int:team_id>/update/", views.collaboration_update_team, name="collaboration_update_team"),
+    path("collaboration/teams/<int:team_id>/leave/", views.collaboration_leave_team, name="collaboration_leave_team"),
+    path(
+        "collaboration/teams/<int:team_id>/members/<int:member_id>/transfer/",
+        views.collaboration_transfer_leadership,
+        name="collaboration_transfer_leadership",
+    ),
+    path(
+        "collaboration/teams/<int:team_id>/members/<int:member_id>/remove/",
+        views.collaboration_remove_member,
+        name="collaboration_remove_member",
+    ),
+    path("collaboration/challenges/<slug:slug>/", views.collaboration_challenge, name="collaboration_challenge"),
+    path(
+        "collaboration/challenges/<slug:slug>/start/",
+        views.collaboration_start_challenge,
+        name="collaboration_start_challenge",
+    ),
+    path(
+        "collaboration/challenges/<slug:slug>/participations/<int:participation_id>/submit/",
+        views.collaboration_submit_challenge,
+        name="collaboration_submit_challenge",
+    ),
+    path("workspace/<slug:feature>/", views.workspace_placeholder, name="workspace_placeholder"),
+    path("profile/", views.profile, name="profile"),
+    path("accounts/login/", views.RoleBasedLoginView.as_view(), name="login"),
+    path("accounts/logout/", views.logout_view, name="logout"),
+    path("accounts/register/", views.register, name="register"),
+]
+

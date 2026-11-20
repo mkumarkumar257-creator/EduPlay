@@ -1,0 +1,66 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}{{ simulation.title }} — EduPlay{% endblock %}
+{% block app_page_title %}Simulation Lab{% endblock %}
+{% block content %}
+<section class="simulation-detail-page" data-performance-lab>
+  <a class="simulation-back-link" href="{% url 'simulation_lab' %}"><span aria-hidden="true">←</span> Back to Simulation Lab</a>
+  <div class="simulation-detail-heading">
+    <div><p class="eyebrow"><span class="eyebrow-dot"></span> COMPUTER SYSTEMS · INTERACTIVE EXPERIMENT</p><h1>{{ simulation.title }}</h1><p class="page-lede">{{ simulation.description }}</p></div>
+    <div class="simulation-detail-tags"><span>{{ simulation.get_difficulty_display }}</span><span>~{{ simulation.estimated_duration_minutes }} min</span><strong>{{ simulation.xp_reward }} XP on first completion</strong></div>
+  </div>
+
+  <div class="simulation-learning-note"><span aria-hidden="true">i</span><p><strong>Learning goal</strong> Observe how foreground CPU work, concurrent processes, available RAM, and background tasks combine to affect a system. Change one control at a time to identify a bottleneck.</p></div>
+  <details class="simulation-formula-note"><summary>How the estimates are calculated</summary><div><p><strong>CPU demand</strong> = foreground workload + 35% of background workload + 1.6 points for each process above four. Utilization is capped at 100%; the system load index shows demand relative to modeled capacity.</p><p><strong>Memory demand</strong> = processes × (0.25 GB + workload ratio × 0.20 GB) + background ratio × 2.5 GB. Memory utilization compares that demand with the selected RAM allocation.</p><p><strong>Performance score</strong> combines CPU pressure (45%), memory pressure (35%), and process contention (20%). Estimated response time starts at 120 ms and increases with those pressures.</p></div></details>
+
+  <div class="simulation-workspace-grid">
+    <section class="simulation-panel simulation-controls-panel" aria-labelledby="experiment-controls-title">
+      <div class="simulation-panel-heading"><div><p class="eyebrow">CONFIGURE THE SYSTEM</p><h2 id="experiment-controls-title">Experiment controls</h2></div><span class="simulation-live-badge"><i></i> Live estimate</span></div>
+      {% if form.non_field_errors %}<div class="simulation-form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      <form method="post" action="{% url 'run_simulation' slug=simulation.slug %}" data-performance-form novalidate>
+        {% csrf_token %}
+        <div class="simulation-control-row"><div class="simulation-control-label"><label for="{{ form.cpu_workload.id_for_label }}">CPU workload</label><span>Foreground demand on the processor</span></div><output for="{{ form.cpu_workload.id_for_label }}" data-value-for="cpu_workload">{{ form.cpu_workload.value|default:55 }}%</output>{{ form.cpu_workload }}<div class="simulation-range-ends"><span>10%</span><span>100%</span></div>{% for error in form.cpu_workload.errors %}<p class="simulation-field-error">{{ error }}</p>{% endfor %}</div>
+        <div class="simulation-control-row"><div class="simulation-control-label"><label for="{{ form.process_count.id_for_label }}">Number of processes</label><span>Tasks competing for system resources</span></div><output for="{{ form.process_count.id_for_label }}" data-value-for="process_count">{{ form.process_count.value|default:4 }} processes</output>{{ form.process_count }}<div class="simulation-range-ends"><span>1 process</span><span>20 processes</span></div>{% for error in form.process_count.errors %}<p class="simulation-field-error">{{ error }}</p>{% endfor %}</div>
+        <div class="simulation-control-row"><div class="simulation-control-label"><label for="{{ form.ram_gb.id_for_label }}">RAM allocation</label><span>Memory available to this system</span></div><output for="{{ form.ram_gb.id_for_label }}" data-value-for="ram_gb">{{ form.ram_gb.value|default:8 }} GB</output>{{ form.ram_gb }}<div class="simulation-range-ends"><span>1 GB</span><span>32 GB</span></div>{% for error in form.ram_gb.errors %}<p class="simulation-field-error">{{ error }}</p>{% endfor %}</div>
+        <div class="simulation-control-row"><div class="simulation-control-label"><label for="{{ form.background_workload.id_for_label }}">Background workload</label><span>Additional work from system services</span></div><output for="{{ form.background_workload.id_for_label }}" data-value-for="background_workload">{{ form.background_workload.value|default:20 }}%</output>{{ form.background_workload }}<div class="simulation-range-ends"><span>0%</span><span>100%</span></div>{% for error in form.background_workload.errors %}<p class="simulation-field-error">{{ error }}</p>{% endfor %}</div>
+        <button class="btn btn-primary-ep simulation-run-button" type="submit">Run experiment <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="simulation-form-footnote">Values are validated and recalculated on the server before an experiment is saved.</p>
+    </section>
+
+    <section class="simulation-panel simulation-output-panel" aria-labelledby="live-output-title">
+      <div class="simulation-panel-heading"><div><p class="eyebrow">ESTIMATED SYSTEM RESPONSE</p><h2 id="live-output-title">Live output</h2></div><span class="simulation-output-spark" aria-hidden="true">✦</span></div>
+      <div class="simulation-live-score"><div class="simulation-score-ring" data-live-score-ring><strong data-live-value="performance_score">—</strong><span>PERFORMANCE</span></div><div class="simulation-condition"><span>System condition</span><strong data-live-value="system_condition">Adjust a control</strong><small>Score estimate out of 100</small></div></div>
+      <div class="simulation-meter-list">
+        <div class="simulation-meter"><div><span>CPU utilization</span><strong data-live-value="cpu_utilization_percent">—%</strong></div><div class="simulation-meter-track"><i data-live-meter="cpu_utilization_percent"></i></div></div>
+        <div class="simulation-meter"><div><span>Memory utilization</span><strong data-live-value="memory_utilization_percent">—%</strong></div><div class="simulation-meter-track"><i data-live-meter="memory_utilization_percent"></i></div></div>
+      </div>
+      <div class="simulation-output-stats"><div><span>Memory demand</span><strong data-live-value="memory_demand_gb">— GB</strong></div><div><span>System load index</span><strong data-live-value="system_load">—×</strong></div><div><span>Estimated response</span><strong data-live-value="estimated_response_ms">— ms</strong></div></div>
+      <div class="simulation-bottleneck-box"><span>BOTTLENECK</span><strong data-live-value="bottleneck">—</strong><p data-live-value="insight">Adjust the controls to see how the system may respond.</p></div>
+      <p class="simulation-model-note">Illustrative estimate using a simplified 4-core desktop profile. Actual hardware results vary.</p>
+    </section>
+  </div>
+
+  {% if run_attempt %}
+    <section class="simulation-panel simulation-saved-result" aria-labelledby="saved-result-title">
+      <div class="simulation-panel-heading"><div><p class="eyebrow">SAVED EXPERIMENT · {{ run_attempt.completed_at|date:"M j, Y · g:i A" }}</p><h2 id="saved-result-title">Experiment result</h2></div><span class="simulation-xp-pill">+{{ run_attempt.xp_awarded }} XP</span></div>
+      <div class="saved-result-summary"><div class="saved-result-score"><strong>{{ run_attempt.results.performance_score }}</strong><span>/ 100</span><small>Performance score</small></div><div><span class="saved-condition">{{ run_attempt.results.system_condition }}</span><h3>{{ run_attempt.results.bottleneck }}</h3><p>{{ run_attempt.results.insight }}</p></div></div>
+      <div class="saved-parameter-line"><span>CPU {{ run_attempt.parameters.cpu_workload }}%</span><span>{{ run_attempt.parameters.process_count }} processes</span><span>{{ run_attempt.parameters.ram_gb }} GB RAM</span><span>Background {{ run_attempt.parameters.background_workload }}%</span></div>
+    </section>
+  {% endif %}
+
+  {% if comparison_rows %}
+    <section class="simulation-panel simulation-comparison-panel" aria-labelledby="comparison-title">
+      <div class="simulation-panel-heading"><div><p class="eyebrow">COMPARE EXPERIMENTS</p><h2 id="comparison-title">What changed?</h2></div><span class="comparison-date">{{ compare_attempt.completed_at|date:"M j, g:i A" }}</span></div>
+      <div class="simulation-comparison-table-wrap"><table class="simulation-comparison-table"><thead><tr><th scope="col">Metric</th><th scope="col">Current</th><th scope="col">Compared run</th><th scope="col">Difference</th></tr></thead><tbody>{% for row in comparison_rows %}<tr><th scope="row">{{ row.label }}</th><td>{{ row.current }}{{ row.unit }}</td><td>{{ row.previous }}{{ row.unit }}</td><td class="{% if row.delta > 0 %}comparison-increase{% elif row.delta < 0 %}comparison-decrease{% endif %}">{% if row.delta > 0 %}+{% endif %}{{ row.delta }}{{ row.unit }}</td></tr>{% endfor %}</tbody></table></div>
+      <p class="simulation-comparison-note">A lower CPU, memory, or response-time value can indicate less pressure; a higher performance score is better. Compare settings as well as results.</p>
+    </section>
+  {% endif %}
+
+  <section class="simulation-panel simulation-history-panel" aria-labelledby="experiment-history-title">
+    <div class="simulation-panel-heading"><div><p class="eyebrow">YOUR SAVED RUNS</p><h2 id="experiment-history-title">Experiment history</h2></div><span class="simulation-history-count">{{ history|length }} recent</span></div>
+    {% if history %}<div class="simulation-history-list">{% for item in history %}<article class="simulation-history-row"><span class="history-run-number">{{ forloop.counter|stringformat:"02d" }}</span><div class="history-run-main"><strong>{{ item.completed_at|date:"M j, Y · g:i A" }}</strong><small>CPU {{ item.parameters.cpu_workload }}% · {{ item.parameters.process_count }} processes · {{ item.parameters.ram_gb }} GB RAM · Background {{ item.parameters.background_workload }}%</small></div><span class="history-score">{{ item.results.performance_score }}<small>/100</small></span>{% if run_attempt and item.pk != run_attempt.pk %}<a class="history-compare-link" href="?run={{ run_attempt.pk }}&amp;compare={{ item.pk }}">Compare</a>{% elif not run_attempt %}<a class="history-compare-link" href="?run={{ item.pk }}">View run</a>{% elif item.pk == run_attempt.pk %}<span class="history-current-label">Current</span>{% endif %}</article>{% endfor %}</div>{% else %}<div class="simulation-history-empty"><span aria-hidden="true">◷</span><div><strong>No experiments saved yet</strong><p>Run your first experiment to create a comparison point and mark this simulation complete.</p></div></div>{% endif %}
+  </section>
+</section>
+{% endblock %}
+{% block extra_scripts %}<script src="{% static 'js/simulation_lab.js' %}" defer></script>{% endblock %}

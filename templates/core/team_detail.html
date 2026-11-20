@@ -1,0 +1,35 @@
+{% extends "app_base.html" %}
+{% load static %}
+{% block title %}{{ team.name }} — Collaboration Hub{% endblock %}
+{% block app_page_title %}Team Details{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/collaboration.css' %}">{% endblock %}
+{% block content %}
+<section class="collab-page">
+  <a class="collab-back-link" href="{% url 'collaboration_hub' %}">← Collaboration Hub</a>
+  <div class="collab-team-detail-hero"><div class="collab-team-emblem large-emblem" aria-hidden="true">{{ team.avatar|default:"◎" }}</div><div class="collab-team-copy"><p class="collab-kicker">TEAM WORKSPACE{% if is_team_leader %} · YOU LEAD THIS TEAM{% endif %}</p><h1>{{ team.name }}</h1><p>{{ team.description|default:"This team is ready to learn together." }}</p><span class="team-created-date">Created {{ team.created_at|date:"M j, Y" }} · Leader: {{ team.leader.get_full_name|default:team.leader.username }}</span></div><div class="collab-team-detail-xp"><strong>{{ team.total_xp }}</strong><span>TEAM XP</span></div></div>
+
+  <div class="collab-detail-stats"><article><span>TEAM MEMBERS</span><strong>{{ active_member_count }}<small>/{{ max_team_size }}</small></strong></article><article><span>CHALLENGES JOINED</span><strong>{{ challenges_joined_count }}</strong></article><article><span>CHALLENGES COMPLETED</span><strong>{{ challenges_completed_count }}</strong></article></div>
+
+  <div class="collab-detail-grid">
+    <div class="collab-detail-main">
+      <section class="collab-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">YOUR CREW</p><h2>Team members</h2></div><span class="collab-count-label">{{ active_member_count }} / {{ max_team_size }}</span></div>
+        <ul class="collab-member-list">{% for membership in team_members %}<li><span class="member-avatar">{{ membership.user.first_name|default:membership.user.username|first|upper }}</span><div class="member-copy"><strong>{{ membership.user.get_full_name|default:membership.user.username }}{% if membership.user_id == request.user.pk %} <small>(you)</small>{% endif %}</strong><span>{{ membership.user.username }}</span></div>{% if membership.user_id == team.leader_id %}<span class="leader-badge">TEAM LEADER</span>{% else %}<span class="member-badge">MEMBER</span>{% endif %}
+          {% if is_team_leader and membership.user_id != request.user.pk %}<div class="member-manage-actions"><form method="post" action="{% url 'collaboration_transfer_leadership' team_id=team.pk member_id=membership.user_id %}">{% csrf_token %}<button type="submit" class="text-action">Make leader</button></form><form method="post" action="{% url 'collaboration_remove_member' team_id=team.pk member_id=membership.user_id %}">{% csrf_token %}<button type="submit" class="text-action danger-action">Remove</button></form></div>{% endif %}
+        </li>{% endfor %}</ul><div class="join-code-callout"><span>SHARE THIS JOINING CODE</span><strong>{{ team.join_code }}</strong><small>Codes are visible to active members only.</small></div>
+      </section>
+
+      <section class="collab-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">TEAM CHALLENGE RECORD</p><h2>Challenges and progress</h2></div><a class="collab-small-link" href="{% url 'collaboration_hub' %}#challenges">Browse challenges →</a></div>
+        {% if team_challenges %}<ul class="collab-list team-challenge-history">{% for participation in team_challenges %}<li><span class="collab-list-icon{% if participation.status == 'completed' %} completed-icon{% endif %}">{% if participation.status == "completed" %}✓{% else %}⌁{% endif %}</span><div><strong><a href="{% url 'collaboration_challenge' slug=participation.challenge.slug %}">{{ participation.challenge.title }}</a></strong><small>{{ participation.get_status_display }} · Joined {{ participation.joined_at|date:"M j, Y" }}</small><div class="collab-progress-track"><i style="width: {{ participation.progress_percent }}%"></i></div></div>{% if participation.status == "completed" %}<span class="earned-xp">+{{ participation.xp_awarded }} XP</span>{% else %}<span class="progress-value">{{ participation.progress_percent }}%</span>{% endif %}</li>{% endfor %}</ul>{% else %}<div class="collab-empty-small"><strong>No challenge history yet</strong><p>Start an open challenge and your team’s progress will show here.</p></div>{% endif %}
+      </section>
+
+      <section class="collab-panel"><div class="collab-panel-heading"><div><p class="collab-kicker">TEAM TIMELINE</p><h2>Activity history</h2></div><span class="collab-panel-icon rose-icon">◷</span></div>{% if team_activity %}<ul class="collab-activity-list">{% for event in team_activity %}<li><span class="activity-pulse"></span><div><strong>{{ event.message }}</strong><small>{{ event.created_at|date:"M j, Y · g:i A" }}</small></div>{% if event.xp_awarded %}<span class="earned-xp">+{{ event.xp_awarded }}</span>{% endif %}</li>{% endfor %}</ul>{% else %}<div class="collab-empty-small"><strong>No activity yet</strong><p>Team events will appear as members and challenges are added.</p></div>{% endif %}</section>
+    </div>
+
+    <aside class="collab-detail-sidebar">
+      {% if is_team_leader %}<section class="collab-panel"><details class="team-edit-details"><summary><span><small class="collab-kicker">LEADER TOOL</small><strong>Edit team details</strong></span><span aria-hidden="true">＋</span></summary><form method="post" action="{% url 'collaboration_update_team' team_id=team.pk %}" class="collab-form">{% csrf_token %}{% for field in team_form %}<div class="collab-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<span class="collab-error">{{ error }}</span>{% endfor %}</div>{% endfor %}<button class="btn collab-secondary-button" type="submit">Save team details</button></form></details></section>{% endif %}
+      <section class="collab-panel collab-side-panel"><p class="collab-kicker">TEAM GUIDELINES</p><h2>Make it collaborative.</h2><ul><li>One active team per learner.</li><li>Teams can hold up to {{ max_team_size }} active members.</li><li>Leaders can update the team, remove members, or transfer leadership.</li><li>Leaders must transfer leadership before leaving a team with other members.</li></ul></section>
+      <section class="collab-panel collab-leave-panel"><p class="collab-kicker">MEMBERSHIP</p>{% if is_team_leader and active_member_count > 1 %}<p>Transfer leadership before you leave so the team keeps a leader.</p>{% elif can_archive_team %}<p>Leaving as the only member archives this team and keeps its challenge history.</p>{% else %}<p>You can leave this team at any time. Past XP and challenge records remain saved.</p>{% endif %}<form method="post" action="{% url 'collaboration_leave_team' team_id=team.pk %}">{% csrf_token %}<button type="submit" class="btn collab-leave-button">{% if can_archive_team %}Archive team and leave{% else %}Leave team{% endif %}</button></form></section>
+    </aside>
+  </div>
+</section>
+{% endblock %}

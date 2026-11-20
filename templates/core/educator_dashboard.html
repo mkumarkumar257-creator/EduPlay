@@ -1,0 +1,24 @@
+{% extends "app_base.html" %}
+{% block title %}Educator dashboard — EduPlay{% endblock %}
+{% block app_page_title %}Educator Dashboard{% endblock %}
+{% block content %}
+<section class="dashboard-section educator-dashboard">
+  <div class="dashboard-greeting"><div class="greeting-copy"><p class="eyebrow"><span class="eyebrow-dot"></span> EDUCATOR WORKSPACE</p><h1>Welcome, <span class="text-accent">{{ user.first_name|default:user.username }}</span>.</h1><p class="page-lede">Build a space where learners can discover what they can do.</p></div><div class="greeting-avatar educator-avatar" aria-label="{{ user.get_full_name|default:user.username }} avatar">{{ user.first_name|default:user.username|first|upper }}</div></div>
+
+  <div class="educator-stats-grid">
+    <article class="educator-stat-card"><span class="stat-label">TOTAL LEARNERS</span><strong>{{ analytics_summary.total_learners }}</strong><small>Registered learner accounts on this platform</small></article>
+    <article class="educator-stat-card"><span class="stat-label">ACTIVE LEARNERS</span><strong>{{ analytics_summary.active_learners }}</strong><small>Recorded learning activity in the last 30 days</small></article>
+    <article class="educator-stat-card"><span class="stat-label">LEARNER ACTIVITIES</span><strong>{{ analytics_summary.total_activities }}</strong><small>Quizzes, simulations, learning content, and collaboration · 30 days</small></article>
+    <article class="educator-stat-card"><span class="stat-label">CATALOG COMPLETION RATE</span>{% if analytics_summary.completion_rate != None %}<strong>{{ analytics_summary.completion_rate }}%</strong><small>Current implemented activity catalog · 30 days</small>{% else %}<strong>—</strong><small>No learners or implemented activities to compare</small>{% endif %}</article>
+  </div>
+
+  <section class="learner-panel educator-quick-panel"><div class="panel-heading"><div><p class="eyebrow">TEACHING WORKSPACE</p><h2>Quick actions</h2></div><span class="coming-soon-pill">CONTENT STUDIO READY</span></div>
+    <div class="quick-action-grid">
+      <a class="quick-action-card" href="{% url 'workspace_placeholder' feature='my-courses' %}"><span class="quick-action-icon module-blue" aria-hidden="true">＋</span><span><strong>Create Course</strong><small>Course tools · coming soon</small></span><span class="quick-action-arrow" aria-hidden="true">→</span></a>
+      <a class="quick-action-card" href="{% url 'educator_content_create' %}"><span class="quick-action-icon module-rose" aria-hidden="true">▧</span><span><strong>Create Learning Content</strong><small>Quizzes, lessons, challenges, and practice</small></span><span class="quick-action-arrow" aria-hidden="true">→</span></a>
+      <a class="quick-action-card" href="{% url 'workspace_placeholder' feature='learners' %}"><span class="quick-action-icon module-blue" aria-hidden="true">◎</span><span><strong>Manage Learners</strong><small>Learner tools · coming soon</small></span><span class="quick-action-arrow" aria-hidden="true">→</span></a>
+      <a class="quick-action-card" href="{% url 'educator_analytics' %}"><span class="quick-action-icon module-rose" aria-hidden="true">▥</span><span><strong>View Analytics</strong><small>Recorded learner reports</small></span><span class="quick-action-arrow" aria-hidden="true">→</span></a>
+    </div>
+  </section>
+</section>
+{% endblock %}
