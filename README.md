@@ -30,6 +30,7 @@ Open `http://127.0.0.1:8000/`. The `DJANGO_SECRET_KEY` value is generated locall
 Configure these Vercel environment variables for Production (and Preview if used):
 
 - `DJANGO_SECRET_KEY`: a unique secret generated outside the repository.
+- `DJANGO_ENV`: `production` (explicit production marker, independent of Vercel system variables).
 - `DJANGO_DEBUG`: `0`.
 - `DATABASE_URL`: a persistent PostgreSQL connection URL. The local SQLite database is ignored by Git and is not suitable for Vercel's serverless filesystem.
 - `DJANGO_ALLOWED_HOSTS`: comma-separated custom hostnames if using a custom domain; `*.vercel.app` hosts are already allowed.

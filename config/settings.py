@@ -13,18 +13,22 @@ if not SECRET_KEY:
         "DJANGO_SECRET_KEY is required. See README.md for a local setup command."
     )
 
+_deployment_environment = os.environ.get("DJANGO_ENV", "").strip().lower()
 _vercel_environment = os.environ.get("VERCEL_ENV", "").strip().lower()
-_is_vercel_production = _vercel_environment in {"production", "preview"} or (
-    os.environ.get("VERCEL", "").strip().lower() in {"1", "true", "yes"}
-    and _vercel_environment != "development"
+_is_production = _deployment_environment in {"production", "preview"} or (
+    _vercel_environment in {"production", "preview"}
+    or (
+        os.environ.get("VERCEL", "").strip().lower() in {"1", "true", "yes"}
+        and _vercel_environment != "development"
+    )
 )
-_default_debug = "0" if _is_vercel_production else "1"
+_default_debug = "0" if _is_production else "1"
 DEBUG = (
     False
-    if _is_vercel_production
+    if _is_production
     else os.environ.get("DJANGO_DEBUG", _default_debug).strip().lower() in {"1", "true", "yes"}
 )
-_requires_postgresql = _is_vercel_production or not DEBUG
+_requires_postgresql = _is_production or not DEBUG
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
@@ -117,7 +121,7 @@ elif not _requires_postgresql:
     }
 else:
     raise ImproperlyConfigured(
-        "DATABASE_URL is required in Vercel production and must point to a persistent PostgreSQL database."
+        "DATABASE_URL is required for production deployments and must point to a persistent PostgreSQL database."
     )
 
 AUTH_USER_MODEL = "core.User"
