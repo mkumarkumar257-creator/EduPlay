@@ -14,9 +14,9 @@ if not SECRET_KEY:
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "1").strip().lower() in {"1", "true", "yes"}
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if host.strip()
+    "localhost",
+    "127.0.0.1",
+    ".vercel.app",
 ]
 
 INSTALLED_APPS = [
@@ -31,6 +31,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise serves compressed static files efficiently in production.
+    # It must come directly after SecurityMiddleware and before everything else.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -83,10 +86,45 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# WhiteNoise: serve compressed static files and add cache-busting fingerprints.
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ---------------------------------------------------------------------------
+# Production security settings
+# These are only activated when DEBUG is False (i.e. in production).
+# They are safe to leave here — they have no effect during local development.
+# ---------------------------------------------------------------------------
+if not DEBUG:
+    # Redirect all non-HTTPS requests to HTTPS.
+    SECURE_SSL_REDIRECT = True
+
+    # Tell browsers to only connect via HTTPS for the next year (31536000 seconds).
+    # includeSubDomains ensures subdomains are also protected.
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Cookies are only sent over HTTPS — prevents session hijacking.
+    SESSION_COOKIE_SECURE = True
+
+    # CSRF cookie is only sent over HTTPS — prevents CSRF token theft.
+    CSRF_COOKIE_SECURE = True
+
+    # Allow the application to detect HTTPS when behind a proxy or load balancer
+    # (PythonAnywhere and most hosts terminate SSL at a proxy layer).
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+    # Trusted origins for CSRF. Must include your deployed domain.
+    # Set via the DJANGO_CSRF_TRUSTED_ORIGINS environment variable.
+    _csrf_origins = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "")
+    if _csrf_origins:
+        CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
+
+# ---------------------------------------------------------------------------
 # Central tuning knobs for the rule-based adaptive learning engine.
+# ---------------------------------------------------------------------------
 ADAPTIVE_RECOMMENDATION_MIN_ANSWERS = 5
 ADAPTIVE_RECOMMENDATION_BANDS = (
     {"minimum": 0, "maximum": 39, "difficulty": "Beginner", "approach": "Revision"},
